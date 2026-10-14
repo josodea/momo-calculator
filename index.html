@@ -1,599 +1,392 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>East African Mobile Money Calculator</title>
-    <meta name="description" content="Simulate cross-border remittances and domestic mobile money fees across East Africa. Supports Safaricom M-Pesa, MTN MoMo, Airtel Money, and Vodacom.">
-    <meta name="keywords" content="East African Mobile Money Calculator, remittance simulator africa, mpesa global calculator, cross-border momo, east africa fx rates">
-    <meta name="robots" content="index, follow">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
-    <header class="bg-indigo-600 text-white shadow-md py-6 px-4">
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl">🌍</span>
-                <div>
-                    <h1 class="text-2xl font-bold tracking-tight">East African Mobile Money Calculator</h1>
-                    <p class="text-xs text-indigo-200">Cross-Border Remittance Simulator & Local Tariff Engine</p>
-                </div>
-            </div>
-            <div id="exchange-badge" class="bg-indigo-700 text-xs px-3 py-1.5 rounded-full border border-indigo-500 text-indigo-100 hidden">
-                Live Interbank FX Rates Loaded
-            </div>
-        </div>
-    </header>
+<script>
+  const countryData = {
+    UG: {
+      currency: 'UGX',
+      networks: {
+        'MTN MoMo': {
+          taxRateTransfer: 0.005,
+          taxRateWithdraw: 0.0,
+          tiersTransfer: [
+            { min: 1, max: 2500, fee: 100 },
+            { min: 2501, max: 5000, fee: 250 },
+            { min: 5001, max: 15000, fee: 450 },
+            { min: 15001, max: 30000, fee: 600 },
+            { min: 30001, max: 45000, fee: 800 },
+            { min: 45001, max: 60000, fee: 1000 },
+            { min: 60001, max: 125000, fee: 1250 },
+            { min: 125001, max: 250000, fee: 1500 },
+            { min: 250001, max: 500000, fee: 1750 },
+            { min: 500001, max: 1000000, fee: 2000 },
+            { min: 1000001, max: 2000000, fee: 2200 },
+            { min: 2000001, max: 4000000, fee: 2500 },
+            { min: 4000001, max: 7000000, fee: 3000 }
+          ],
+          tiersWithdraw: [
+            { min: 1, max: 2500, fee: 350 },
+            { min: 2501, max: 5000, fee: 450 },
+            { min: 5001, max: 15000, fee: 700 },
+            { min: 15001, max: 30000, fee: 1000 },
+            { min: 30001, max: 45000, fee: 1300 },
+            { min: 45001, max: 60000, fee: 1750 },
+            { min: 60001, max: 125000, fee: 2125 },
+            { min: 125001, max: 250000, fee: 3875 },
+            { min: 250001, max: 500000, fee: 5500 },
+            { min: 500001, max: 1000000, fee: 7500 },
+            { min: 1000001, max: 2000000, fee: 12500 },
+            { min: 2000001, max: 4000000, fee: 15000 },
+            { min: 4000001, max: 7000000, fee: 20000 }
+          ]
+        },
+        'Airtel Money': {
+          taxRateTransfer: 0.005,
+          taxRateWithdraw: 0.0,
+          tiersTransfer: [
+            { min: 1, max: 2500, fee: 90 },
+            { min: 2501, max: 5000, fee: 230 },
+            { min: 5001, max: 15000, fee: 400 },
+            { min: 15001, max: 30000, fee: 550 },
+            { min: 30001, max: 45000, fee: 750 },
+            { min: 45001, max: 60000, fee: 900 },
+            { min: 60001, max: 125000, fee: 1100 },
+            { min: 125001, max: 250000, fee: 1350 },
+            { min: 250001, max: 500000, fee: 1600 },
+            { min: 500001, max: 1000000, fee: 1800 },
+            { min: 1000001, max: 2000000, fee: 2000 },
+            { min: 2000001, max: 4000000, fee: 2300 },
+            { min: 4000001, max: 7000000, fee: 2800 }
+          ],
+          tiersWithdraw: [
+            { min: 1, max: 2500, fee: 330 },
+            { min: 2501, max: 5000, fee: 400 },
+            { min: 5001, max: 15000, fee: 650 },
+            { min: 15001, max: 30000, fee: 900 },
+            { min: 30001, max: 45000, fee: 1200 },
+            { min: 45001, max: 60000, fee: 1600 },
+            { min: 60001, max: 125000, fee: 2000 },
+            { min: 125001, max: 250000, fee: 3600 },
+            { min: 250001, max: 500000, fee: 5200 },
+            { min: 500001, max: 1000000, fee: 7000 },
+            { min: 1000001, max: 2000000, fee: 12000 },
+            { min: 2000001, max: 4000000, fee: 14500 },
+            { min: 4000001, max: 7000000, fee: 19000 }
+          ]
+        }
+      }
+    },
+    KE: {
+      currency: 'KES',
+      networks: {
+        'Safaricom M-Pesa': {
+          taxRateTransfer: 0.12,
+          taxRateWithdraw: 0.12,
+          tiersTransfer: [
+            { min: 1, max: 100, fee: 0 },
+            { min: 101, max: 500, fee: 7 },
+            { min: 501, max: 1000, fee: 13 },
+            { min: 1001, max: 1500, fee: 23 },
+            { min: 1501, max: 2500, fee: 33 },
+            { min: 2501, max: 3500, fee: 53 },
+            { min: 3501, max: 5000, fee: 57 },
+            { min: 5001, max: 7500, fee: 77 },
+            { min: 7501, max: 10000, fee: 89 },
+            { min: 10001, max: 15000, fee: 99 },
+            { min: 15001, max: 20000, fee: 102 },
+            { min: 20001, max: 250000, fee: 105 }
+          ],
+          tiersWithdraw: [
+            { min: 1, max: 49, fee: 0 },
+            { min: 50, max: 100, fee: 11 },
+            { min: 101, max: 500, fee: 28 },
+            { min: 501, max: 1000, fee: 29 },
+            { min: 1001, max: 1500, fee: 30 },
+            { min: 1501, max: 2500, fee: 34 },
+            { min: 2501, max: 3500, fee: 52 },
+            { min: 3501, max: 5000, fee: 69 },
+            { min: 5001, max: 7500, fee: 87 },
+            { min: 7501, max: 10000, fee: 115 },
+            { min: 10001, max: 15000, fee: 167 },
+            { min: 15001, max: 20000, fee: 185 },
+            { min: 20001, max: 35000, fee: 198 },
+            { min: 35001, max: 50000, fee: 275 },
+            { min: 50001, max: 250000, fee: 309 }
+          ]
+        }
+      }
+    },
+    TZ: {
+      currency: 'TZS',
+      networks: {
+        'Vodacom M-Pesa': {
+          taxRateTransfer: 0.0,
+          taxRateWithdraw: 0.0,
+          tiersTransfer: [
+            { min: 1, max: 999, fee: 10 },
+            { min: 1000, max: 4999, fee: 45 },
+            { min: 5000, max: 9999, fee: 150 },
+            { min: 10000, max: 49999, fee: 320 },
+            { min: 50000, max: 199999, fee: 650 },
+            { min: 200000, max: 999999, fee: 1200 },
+            { min: 1000000, max: 5000000, fee: 3000 }
+          ],
+          tiersWithdraw: [
+            { min: 1, max: 999, fee: 20 },
+            { min: 1000, max: 4999, fee: 150 },
+            { min: 5000, max: 9999, fee: 350 },
+            { min: 10000, max: 49999, fee: 950 },
+            { min: 50000, max: 199999, fee: 2300 },
+            { min: 200000, max: 999999, fee: 4700 },
+            { min: 1000000, max: 5000000, fee: 8500 }
+          ]
+        }
+      }
+    },
+    RW: {
+      currency: 'RWF',
+      networks: {
+        'MTN MoMo': {
+          taxRateTransfer: 0.0,
+          taxRateWithdraw: 0.0,
+          tiersTransfer: [
+            { min: 1, max: 1000, fee: 0 },
+            { min: 1001, max: 10000, fee: 100 },
+            { min: 10001, max: 100000, fee: 250 },
+            { min: 100001, max: 500000, fee: 500 },
+            { min: 500001, max: 3000000, fee: 1000 }
+          ],
+          tiersWithdraw: [
+            { min: 1, max: 1000, fee: 25 },
+            { min: 1001, max: 10000, fee: 150 },
+            { min: 10001, max: 100000, fee: 600 },
+            { min: 100001, max: 500000, fee: 1500 },
+            { min: 500001, max: 3000000, fee: 4000 }
+          ]
+        }
+      }
+    }
+  };
 
-    <main class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <section class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-5">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h2 class="text-lg font-semibold text-slate-900">Transaction Workflow</h2>
-                <div class="flex p-0.5 bg-slate-100 rounded-lg text-xs font-medium">
-                    <button id="mode-local" class="px-3 py-1.5 rounded-md bg-white text-indigo-600 shadow-xs transition-all">Domestic</button>
-                    <button id="mode-cross" class="px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-800 transition-all">Cross-Border</button>
-                </div>
-            </div>
+  const fallbackRates = { UGX: 3710, KES: 129, TZS: 2510, RWF: 1260, USD: 1 };
+  const moneyFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                    <label for="country-select" id="origin-label" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Sender Country</label>
-                    <select id="country-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors">
-                        <option value="UG">Uganda (UGX)</option>
-                        <option value="KE">Kenya (KES)</option>
-                        <option value="TZ">Tanzania (TZS)</option>
-                        <option value="RW">Rwanda (RWF)</option>
-                        <option value="CD">DR Congo (CDF)</option>
-                        <option value="SS">South Sudan (SSP)</option>
-                        <option value="ET">Ethiopia (ETB)</option>
-                    </select>
-                </div>
+  const state = {
+    activeTransactionType: 'transfer',
+    exchangeRates: { ...fallbackRates }
+  };
 
-                <div>
-                    <label for="network-select" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Sending Wallet Provider</label>
-                    <select id="network-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors"></select>
-                </div>
-            </div>
+  const elements = {
+    country: document.getElementById('country-select'),
+    network: document.getElementById('network-select'),
+    currencyAddon: document.getElementById('currency-addon'),
+    amount: document.getElementById('amount-input'),
+    transferButton: document.getElementById('type-transfer'),
+    withdrawButton: document.getElementById('type-withdraw'),
+    bracketInfo: document.getElementById('bracket-info'),
+    breakdownBase: document.getElementById('breakdown-base'),
+    breakdownFee: document.getElementById('breakdown-fee'),
+    breakdownTax: document.getElementById('breakdown-tax'),
+    breakdownTotal: document.getElementById('breakdown-total'),
+    usdCrossContainer: document.getElementById('usd-cross-container'),
+    usdCrossValue: document.getElementById('usd-cross-value'),
+    exchangeBadge: document.getElementById('exchange-badge'),
+    labelTax: document.getElementById('label-tax'),
+    labelTotal: document.getElementById('label-total')
+  };
 
-            <div id="destination-corridor-box" class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
-                <div>
-                    <label for="dest-country-select" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Recipient Country</label>
-                    <select id="dest-country-select" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors">
-                        <option value="KE">Kenya (KES)</option>
-                        <option value="UG">Uganda (UGX)</option>
-                        <option value="TZ">Tanzania (TZS)</option>
-                        <option value="RW">Rwanda (RWF)</option>
-                    </select>
-                </div>
+  function formatValue(value) {
+    return moneyFormatter.format(Number(value) || 0);
+  }
 
-                <div>
-                    <label for="dest-network-select" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Receiving Network</label>
-                    <select id="dest-network-select" class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors"></select>
-                </div>
-            </div>
+  function setText(element, value) {
+    if (element) element.textContent = value;
+  }
 
-            <div id="tx-type-container">
-                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Transaction Type</label>
-                <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-xl">
-                    <button id="type-transfer" class="py-2.5 text-sm font-medium rounded-lg transition-all text-white bg-indigo-600 shadow-sm">
-                        Send Money
-                    </button>
-                    <button id="type-withdraw" class="py-2.5 text-sm font-medium rounded-lg transition-all text-slate-600 hover:text-slate-900">
-                        Withdrawal
-                    </button>
-                </div>
-            </div>
+  function debounce(fn, delay = 120) {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => fn(...args), delay);
+    };
+  }
 
-            <div>
-                <label for="amount-input" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Amount to Process</label>
-                <div class="relative">
-                    <span id="currency-addon" class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">UGX</span>
-                    <input type="number" id="amount-input" min="1" placeholder="Enter amount" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-16 pr-4 py-3 text-lg font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors" value="5000">
-                </div>
-                <span id="tier-badge" class="inline-block mt-2 text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md hidden">Tier Range Tracker</span>
-            </div>
-        </section>
+  function findTierMatch(tiers, amount) {
+    if (!Array.isArray(tiers) || tiers.length === 0) return null;
+    for (let i = 0; i < tiers.length; i += 1) {
+      const tier = tiers[i];
+      if (amount >= tier.min && amount <= tier.max) return tier;
+    }
+    return tiers[tiers.length - 1];
+  }
 
-        <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col justify-between gap-6">
-            <div>
-                <h2 class="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-3 mb-5">Financial Output</h2>
+  function populateNetworks() {
+    const country = elements.country.value;
+    const networks = Object.keys(countryData[country]?.networks || {});
+    const fragment = document.createDocumentFragment();
 
-                <div class="flex flex-col gap-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-slate-500">Base Principal</span>
-                        <span id="breakdown-base" class="font-medium text-slate-800">0.00</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span id="label-fee" class="text-sm text-slate-500">Tier Fee Charge</span>
-                        <span id="breakdown-fee" class="font-medium text-amber-600">0.00</span>
-                    </div>
-                    <div id="tax-row" class="flex justify-between items-center">
-                        <span id="label-tax" class="text-sm text-slate-500">Government Tax</span>
-                        <span id="breakdown-tax" class="font-medium text-amber-600">0.00</span>
-                    </div>
+    elements.network.innerHTML = '';
+    networks.forEach((network) => {
+      const option = document.createElement('option');
+      option.value = network;
+      option.textContent = network;
+      fragment.appendChild(option);
+    });
 
-                    <div id="remittance-fields" class="hidden flex flex-col gap-4 border-t border-dashed border-slate-100 pt-3">
-                        <div class="flex flex-col bg-amber-50 p-3 rounded-xl gap-1 text-xs">
-                            <span class="text-amber-700 font-semibold uppercase tracking-wider text-[10px]">Applied Remittance Cross-Rate</span>
-                            <span id="breakdown-fx-rate" class="font-bold text-amber-900 text-sm">1 UGX = 0.00 KES</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100/50">
-                            <span class="text-sm font-semibold text-emerald-700">Net Recipient Payout</span>
-                            <span id="breakdown-dest-payout" class="font-bold text-emerald-700 text-lg">0.00</span>
-                        </div>
-                    </div>
+    elements.network.appendChild(fragment);
+    const currency = countryData[country]?.currency || 'UGX';
+    if (elements.currencyAddon) elements.currencyAddon.textContent = currency;
+  }
 
-                    <div class="flex justify-between items-center border-t border-slate-100 pt-3">
-                        <span id="label-total" class="text-sm text-slate-500 font-semibold">Total Sender Outlay</span>
-                        <span id="breakdown-total" class="font-bold text-slate-900">0.00</span>
-                    </div>
-                </div>
-            </div>
+  async function fetchExchangeRates() {
+    const cacheKey = 'pan-african-momo-rates';
+    const ttlMs = 60 * 60 * 1000;
 
-            <div class="bg-slate-50 border border-slate-100 rounded-xl p-4">
-                <div class="text-xs uppercase tracking-wider text-slate-500 mb-2">Global Valuation Reference</div>
-                <div id="usd-cross-container" class="flex justify-between items-center">
-                    <span class="text-sm text-slate-500">Value in USD</span>
-                    <span id="usd-cross-value" class="font-medium text-slate-800">$0.00</span>
-                </div>
-            </div>
-        </section>
-    </main>
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const age = Date.now() - parsed.timestamp;
+        if (age < ttlMs) {
+          state.exchangeRates = { ...fallbackRates, ...parsed.rates };
+        }
+      }
+    } catch (error) {
+      // Ignore cache issues gracefully.
+    }
 
-    <script>
-        const countryData = {
-            UG: {
-                currency: "UGX",
-                networks: {
-                    "MTN MoMo": {
-                        taxRate: 0.005,
-                        tiers: [
-                            { max: 2500, send: 100, withdraw: 350 },
-                            { max: 5000, send: 250, withdraw: 400 },
-                            { max: 15000, send: 450, withdraw: 900 },
-                            { max: 30000, send: 600, withdraw: 1100 },
-                            { max: 45000, send: 800, withdraw: 1300 },
-                            { max: 60000, send: 1000, withdraw: 1500 },
-                            { max: 125000, send: 1200, withdraw: 2200 },
-                            { max: 250000, send: 1500, withdraw: 3500 },
-                            { max: 500000, send: 2000, withdraw: 6500 },
-                            { max: 1000000, send: 2500, withdraw: 7500 },
-                            { max: 2000000, send: 3500, withdraw: 12500 },
-                            { max: 5000000, send: 6000, withdraw: 25000 },
-                            { max: 7000000, send: 7500, withdraw: 31000 }
-                        ]
-                    },
-                    "Airtel Money": {
-                        taxRate: 0.005,
-                        tiers: [
-                            { max: 2500, send: 90, withdraw: 330 },
-                            { max: 5000, send: 230, withdraw: 380 },
-                            { max: 15000, send: 400, withdraw: 850 },
-                            { max: 30000, send: 550, withdraw: 1000 },
-                            { max: 45000, send: 750, withdraw: 1200 },
-                            { max: 7000000, send: 5000, withdraw: 29000 }
-                        ]
-                    }
-                }
-            },
-            KE: {
-                currency: "KES",
-                networks: {
-                    "Safaricom M-Pesa": {
-                        taxRate: 0.12,
-                        tiers: [
-                            { max: 100, send: 0, withdraw: 11 },
-                            { max: 500, send: 7, withdraw: 29 },
-                            { max: 1000, send: 13, withdraw: 29 },
-                            { max: 1500, send: 23, withdraw: 36 },
-                            { max: 2500, send: 33, withdraw: 36 },
-                            { max: 3500, send: 53, withdraw: 54 },
-                            { max: 5000, send: 57, withdraw: 72 },
-                            { max: 7500, send: 78, withdraw: 92 },
-                            { max: 10000, send: 91, withdraw: 118 },
-                            { max: 15000, send: 102, withdraw: 172 },
-                            { max: 20000, send: 105, withdraw: 202 },
-                            { max: 250000, send: 108, withdraw: 309 }
-                        ]
-                    },
-                    "Airtel Money": {
-                        taxRate: 0.12,
-                        tiers: [
-                            { max: 100, send: 0, withdraw: 10 },
-                            { max: 1000, send: 10, withdraw: 27 },
-                            { max: 250000, send: 100, withdraw: 290 }
-                        ]
-                    }
-                }
-            },
-            TZ: {
-                currency: "TZS",
-                networks: {
-                    "Vodacom M-Pesa": { taxRate: 0, tiers: [{ max: 10000000, send: 450, withdraw: 1200 }] },
-                    "Tigo Pesa": { taxRate: 0, tiers: [{ max: 10000000, send: 400, withdraw: 1100 }] },
-                    "Airtel Money": { taxRate: 0, tiers: [{ max: 10000000, send: 410, withdraw: 1150 }] }
-                }
-            },
-            RW: {
-                currency: "RWF",
-                networks: {
-                    "MTN MoMo": { taxRate: 0, tiers: [{ max: 5000000, send: 200, withdraw: 800 }] },
-                    "Airtel Money": { taxRate: 0, tiers: [{ max: 5000000, send: 150, withdraw: 700 }] }
-                }
-            },
-            CD: {
-                currency: "CDF",
-                networks: {
-                    "Orange Money": { taxRate: 0, tiers: [{ max: 5000000, send: 800, withdraw: 1500 }] },
-                    "Airtel Money": { taxRate: 0, tiers: [{ max: 5000000, send: 850, withdraw: 1500 }] }
-                }
-            },
-            SS: {
-                currency: "SSP",
-                networks: {
-                    "m-Gurush": { taxRate: 0, tiers: [{ max: 1000000, send: 40, withdraw: 90 }] }
-                }
-            },
-            ET: {
-                currency: "ETB",
-                networks: {
-                    "Ethio Telecom Telebirr": { taxRate: 0, tiers: [{ max: 500000, send: 10, withdraw: 25 }] }
-                }
-            }
-        };
+    try {
+      const response = await fetch('https://open.er-api.com/v6/latest/USD');
+      if (!response.ok) throw new Error('Exchange fetch failed');
 
-        const internationalCorridors = {
-            flatRemitFeePercent: 0.015,
-            fxBrokerMargin: 0.035
-        };
+      const data = await response.json();
+      if (data?.rates) {
+        state.exchangeRates = { ...fallbackRates, ...data.rates };
 
-        const state = {
-            exchangeRates: {
-                UGX: 3715,
-                KES: 129.5,
-                TZS: 2680,
-                RWF: 1310,
-                CDF: 2850,
-                SSP: 130,
-                ETB: 122,
-                USD: 1
-            },
-            currentMode: 'local',
-            activeTransactionType: 'transfer'
-        };
-
-        const elements = {
-            countrySelect: document.getElementById('country-select'),
-            networkSelect: document.getElementById('network-select'),
-            destCountrySelect: document.getElementById('dest-country-select'),
-            destNetworkSelect: document.getElementById('dest-network-select'),
-            currencyAddon: document.getElementById('currency-addon'),
-            amountInput: document.getElementById('amount-input'),
-            tierBadge: document.getElementById('tier-badge'),
-            modeLocal: document.getElementById('mode-local'),
-            modeCross: document.getElementById('mode-cross'),
-            typeTransfer: document.getElementById('type-transfer'),
-            typeWithdraw: document.getElementById('type-withdraw'),
-            txTypeContainer: document.getElementById('tx-type-container'),
-            destinationCorridorBox: document.getElementById('destination-corridor-box'),
-            breakdownBase: document.getElementById('breakdown-base'),
-            breakdownFee: document.getElementById('breakdown-fee'),
-            breakdownTax: document.getElementById('breakdown-tax'),
-            breakdownTotal: document.getElementById('breakdown-total'),
-            breakdownDestPayout: document.getElementById('breakdown-dest-payout'),
-            breakdownFxRate: document.getElementById('breakdown-fx-rate'),
-            taxRow: document.getElementById('tax-row'),
-            remittanceFields: document.getElementById('remittance-fields'),
-            usdCrossContainer: document.getElementById('usd-cross-container'),
-            usdCrossValue: document.getElementById('usd-cross-value'),
-            exchangeBadge: document.getElementById('exchange-badge'),
-            originLabel: document.getElementById('origin-label'),
-            labelFee: document.getElementById('label-fee'),
-            labelTax: document.getElementById('label-tax'),
-            labelTotal: document.getElementById('label-total')
-        };
-
-        const formatNumber = (value, maxFractionDigits = 2) => Number(value).toLocaleString('en-US', {
-            maximumFractionDigits: maxFractionDigits,
-            minimumFractionDigits: 0
-        });
-
-        const formatCurrency = (value, currency) => `${formatNumber(value)} ${currency}`;
-
-        const setText = (element, value) => {
-            if (element) {
-                element.textContent = value;
-            }
-        };
-
-        const debounce = (callback, delay = 120) => {
-            let timeoutId;
-            return (...args) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => callback(...args), delay);
-            };
-        };
-
-        function getTierForAmount(tiers, amount) {
-            if (!Array.isArray(tiers) || !tiers.length) {
-                return { max: amount, send: 0, withdraw: 0 };
-            }
-            return tiers.find((tier) => amount <= tier.max) || tiers[tiers.length - 1];
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({
+            timestamp: Date.now(),
+            rates: data.rates
+          }));
+        } catch (error) {
+          // Ignore storage protection issues.
         }
 
-        function populateNetworks(sourceDropdown, targetDropdown) {
-            const country = sourceDropdown.value;
-            const networkMap = countryData[country]?.networks;
-            const fragment = document.createDocumentFragment();
+        if (elements.exchangeBadge) elements.exchangeBadge.classList.remove('hidden');
+      }
+    } catch (error) {
+      state.exchangeRates = { ...fallbackRates };
+      if (elements.exchangeBadge) {
+        elements.exchangeBadge.textContent = 'Using fallback FX rates';
+        elements.exchangeBadge.classList.remove('hidden');
+      }
+    }
+  }
 
-            targetDropdown.innerHTML = '';
+  function renderUSDValue(amount, currency) {
+    if (!elements.usdCrossContainer || !elements.usdCrossValue) return;
 
-            if (!networkMap) {
-                return;
-            }
+    if (state.exchangeRates[currency]) {
+      const usdValue = amount / state.exchangeRates[currency];
+      elements.usdCrossValue.textContent = `$${usdValue.toFixed(2)}`;
+      elements.usdCrossContainer.classList.remove('hidden');
+    } else {
+      elements.usdCrossContainer.classList.add('hidden');
+    }
+  }
 
-            Object.keys(networkMap).forEach((network) => {
-                const option = document.createElement('option');
-                option.value = network;
-                option.textContent = network;
-                fragment.appendChild(option);
-            });
+  function clearDisplay(currency) {
+    setText(elements.bracketInfo, '');
+    setText(elements.breakdownBase, `0.00 ${currency}`);
+    setText(elements.breakdownFee, `0.00 ${currency}`);
+    setText(elements.breakdownTax, `0.00 ${currency}`);
+    setText(elements.breakdownTotal, `0.00 ${currency}`);
+    elements.usdCrossContainer?.classList.add('hidden');
+  }
 
-            targetDropdown.appendChild(fragment);
+  function setTransactionType(type, activeButton, inactiveButton) {
+    state.activeTransactionType = type;
 
-            if (sourceDropdown === elements.countrySelect && elements.currencyAddon) {
-                elements.currencyAddon.textContent = countryData[country]?.currency || 'UGX';
-            }
-        }
+    activeButton.className = 'py-2.5 text-sm font-medium rounded-lg transition-all text-white bg-indigo-600 shadow-sm';
+    inactiveButton.className = 'py-2.5 text-sm font-medium rounded-lg transition-all text-slate-600 hover:text-slate-900';
 
-        function toggleModeUI(activeButton, inactiveButton) {
-            activeButton.className = 'px-3 py-1.5 rounded-md bg-white text-indigo-600 shadow-xs transition-all';
-            inactiveButton.className = 'px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-800 transition-all';
-        }
+    if (type === 'transfer') {
+      setText(elements.labelTax, 'Statutory Tax');
+      setText(elements.labelTotal, 'Total Outlay Required');
+    } else {
+      setText(elements.labelTax, 'Excise Surcharge');
+      setText(elements.labelTotal, 'Net Received Cash');
+    }
 
-        function setTxType(type, active, inactive) {
-            state.activeTransactionType = type;
-            active.className = 'py-2.5 text-sm font-medium rounded-lg transition-all text-white bg-indigo-600 shadow-sm';
-            inactive.className = 'py-2.5 text-sm font-medium rounded-lg transition-all text-slate-600 hover:text-slate-900';
+    calculate();
+  }
 
-            if (type === 'transfer') {
-                setText(elements.labelTax, 'Government Tax');
-                setText(elements.labelTotal, 'Total Sender Outlay');
-            } else {
-                setText(elements.labelTax, 'Withholding Excise');
-                setText(elements.labelTotal, 'Net Take-home Cash');
-            }
+  function calculate() {
+    const country = elements.country.value;
+    const network = elements.network.value;
+    const amount = Number.parseFloat(elements.amount.value) || 0;
+    const currency = countryData[country]?.currency || 'UGX';
 
-            calculate();
-        }
+    if (!network || amount <= 0) {
+      clearDisplay(currency);
+      return;
+    }
 
-        function renderUSDEquivalent(amount, currency) {
-            if (elements.usdCrossValue && elements.usdCrossContainer) {
-                if (state.exchangeRates[currency]) {
-                    const usdValue = amount / state.exchangeRates[currency];
-                    setText(elements.usdCrossValue, `$${usdValue.toFixed(2)}`);
-                    elements.usdCrossContainer.classList.remove('hidden');
-                } else {
-                    elements.usdCrossContainer.classList.add('hidden');
-                }
-            }
-        }
+    const ruleConfig = countryData[country].networks[network];
+    const tiers = state.activeTransactionType === 'transfer' ? ruleConfig.tiersTransfer : ruleConfig.tiersWithdraw;
+    const matchedTier = findTierMatch(tiers, amount) || tiers[tiers.length - 1];
+    const baseFee = matchedTier ? matchedTier.fee : 0;
 
-        function clearDisplay(currency) {
-            setText(elements.breakdownBase, `0.00 ${currency}`);
-            setText(elements.breakdownFee, `0.00 ${currency}`);
-            setText(elements.breakdownTax, `0.00 ${currency}`);
-            setText(elements.breakdownTotal, `0.00 ${currency}`);
-            setText(elements.breakdownDestPayout, '0.00');
-            if (elements.tierBadge) {
-                elements.tierBadge.classList.add('hidden');
-            }
-            if (elements.usdCrossContainer) {
-                elements.usdCrossContainer.classList.add('hidden');
-            }
-        }
+    let tax = 0;
+    let total = 0;
 
-        function calculateLocalTariff(country, network, amount, currency) {
-            const config = countryData[country]?.networks?.[network];
+    if (state.activeTransactionType === 'transfer') {
+      if (country === 'UG') {
+        tax = amount * ruleConfig.taxRateTransfer;
+      } else if (country === 'KE') {
+        tax = baseFee * ruleConfig.taxRateTransfer;
+      }
+      total = amount + baseFee + tax;
+    } else {
+      if (country === 'KE') {
+        tax = baseFee * ruleConfig.taxRateWithdraw;
+      }
+      total = amount - baseFee - tax;
+    }
 
-            if (!config) {
-                clearDisplay(currency);
-                return;
-            }
+    setText(
+      elements.bracketInfo,
+      `Matched Tier Range: ${formatValue(matchedTier.min)} - ${formatValue(matchedTier.max)} ${currency}`
+    );
+    setText(elements.breakdownBase, `${formatValue(amount)} ${currency}`);
+    setText(elements.breakdownFee, `${formatValue(baseFee)} ${currency}`);
+    setText(elements.breakdownTax, `${formatValue(tax)} ${currency}`);
+    setText(elements.breakdownTotal, `${formatValue(total)} ${currency}`);
 
-            const matchedTier = getTierForAmount(config.tiers, amount);
-            let platformFee = state.activeTransactionType === 'transfer' ? matchedTier.send : matchedTier.withdraw;
-            let tax = 0;
-            let totalOutlay = 0;
+    renderUSDValue(amount, currency);
+  }
 
-            if (elements.tierBadge) {
-                setText(elements.tierBadge, `Matched Tier Max: ${formatNumber(matchedTier.max)} ${currency}`);
-                elements.tierBadge.classList.remove('hidden');
-            }
+  function setupEventListeners() {
+    elements.country.addEventListener('change', () => {
+      populateNetworks();
+      calculate();
+    });
 
-            setText(elements.labelFee, 'Tier Fee Charge');
+    elements.network.addEventListener('change', calculate);
+    elements.amount.addEventListener('input', debounce(calculate, 120));
 
-            if (country === 'KE') {
-                tax = platformFee * config.taxRate;
-                totalOutlay = state.activeTransactionType === 'transfer'
-                    ? amount + platformFee + tax
-                    : amount - platformFee - tax;
-            } else if (country === 'UG') {
-                tax = state.activeTransactionType === 'withdraw' ? amount * config.taxRate : 0;
-                totalOutlay = state.activeTransactionType === 'transfer'
-                    ? amount + platformFee
-                    : amount - platformFee - tax;
-            } else {
-                totalOutlay = state.activeTransactionType === 'transfer'
-                    ? amount + platformFee
-                    : amount - platformFee;
-            }
+    elements.transferButton.addEventListener('click', () => {
+      setTransactionType('transfer', elements.transferButton, elements.withdrawButton);
+    });
 
-            setText(elements.breakdownBase, `${formatNumber(amount)} ${currency}`);
-            setText(elements.breakdownFee, `${formatNumber(platformFee)} ${currency}`);
-            setText(elements.breakdownTax, `${formatNumber(tax)} ${currency}`);
-            setText(elements.breakdownTotal, `${formatNumber(totalOutlay)} ${currency}`);
-            renderUSDEquivalent(amount, currency);
-        }
+    elements.withdrawButton.addEventListener('click', () => {
+      setTransactionType('withdraw', elements.withdrawButton, elements.transferButton);
+    });
+  }
 
-        function calculateCrossBorderRemittance(srcCountry, srcNetwork, amount, srcCurrency) {
-            const destCountry = elements.destCountrySelect.value;
-            const destCurrency = countryData[destCountry]?.currency || 'KES';
+  async function init() {
+    setupEventListeners();
+    populateNetworks();
+    await fetchExchangeRates();
+    calculate();
+  }
 
-            if (elements.labelFee) {
-                elements.labelFee.textContent = 'Remittance Routing Fee';
-            }
-
-            if (elements.tierBadge) {
-                elements.tierBadge.classList.add('hidden');
-            }
-
-            const routingFee = amount * internationalCorridors.flatRemitFeePercent;
-            const midMarketSrcToUSD = state.exchangeRates[srcCurrency] || 1;
-            const midMarketDestToUSD = state.exchangeRates[destCurrency] || 1;
-            const cleanCrossRate = midMarketDestToUSD / midMarketSrcToUSD;
-            const customRemitCrossRate = cleanCrossRate * (1 - internationalCorridors.fxBrokerMargin);
-            const principalReceivableDest = amount * customRemitCrossRate;
-            const totalSenderOutlay = amount + routingFee;
-
-            setText(elements.breakdownBase, `${formatNumber(amount)} ${srcCurrency}`);
-            setText(elements.breakdownFee, `${formatNumber(routingFee)} ${srcCurrency}`);
-            setText(elements.breakdownTotal, `${formatNumber(totalSenderOutlay)} ${srcCurrency}`);
-            setText(elements.breakdownTax, `0.00 ${srcCurrency}`);
-
-            if (elements.breakdownFxRate) {
-                setText(elements.breakdownFxRate, `1 ${srcCurrency} = ${customRemitCrossRate.toFixed(4)} ${destCurrency}`);
-            }
-            if (elements.breakdownDestPayout) {
-                setText(elements.breakdownDestPayout, `${principalReceivableDest.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${destCurrency}`);
-            }
-
-            renderUSDEquivalent(amount, srcCurrency);
-        }
-
-        function calculate() {
-            const srcCountry = elements.countrySelect.value;
-            const srcNetwork = elements.networkSelect.value;
-            const amount = Number.parseFloat(elements.amountInput.value) || 0;
-            const srcCurrency = countryData[srcCountry]?.currency || 'UGX';
-
-            if (amount <= 0 || !srcNetwork) {
-                clearDisplay(srcCurrency);
-                return;
-            }
-
-            if (state.currentMode === 'local') {
-                calculateLocalTariff(srcCountry, srcNetwork, amount, srcCurrency);
-            } else {
-                calculateCrossBorderRemittance(srcCountry, srcNetwork, amount, srcCurrency);
-            }
-        }
-
-        function setupEventListeners() {
-            elements.countrySelect.addEventListener('change', () => {
-                populateNetworks(elements.countrySelect, elements.networkSelect);
-                calculate();
-            });
-
-            elements.networkSelect.addEventListener('change', calculate);
-            elements.destCountrySelect.addEventListener('change', () => {
-                populateNetworks(elements.destCountrySelect, elements.destNetworkSelect);
-                calculate();
-            });
-            elements.destNetworkSelect.addEventListener('change', calculate);
-            elements.amountInput.addEventListener('input', debounce(calculate, 120));
-
-            elements.modeLocal.addEventListener('click', () => {
-                state.currentMode = 'local';
-                toggleModeUI(elements.modeLocal, elements.modeCross);
-                elements.destinationCorridorBox.classList.add('hidden');
-                elements.txTypeContainer.classList.remove('hidden');
-                elements.remittanceFields.classList.add('hidden');
-                elements.taxRow.classList.remove('hidden');
-                if (elements.originLabel) {
-                    elements.originLabel.textContent = 'Select Country';
-                }
-                calculate();
-            });
-
-            elements.modeCross.addEventListener('click', () => {
-                state.currentMode = 'cross';
-                toggleModeUI(elements.modeCross, elements.modeLocal);
-                elements.destinationCorridorBox.classList.remove('hidden');
-                elements.txTypeContainer.classList.add('hidden');
-                elements.remittanceFields.classList.remove('hidden');
-                elements.taxRow.classList.add('hidden');
-                if (elements.originLabel) {
-                    elements.originLabel.textContent = 'Sender Country';
-                }
-                calculate();
-            });
-
-            elements.typeTransfer.addEventListener('click', () => setTxType('transfer', elements.typeTransfer, elements.typeWithdraw));
-            elements.typeWithdraw.addEventListener('click', () => setTxType('withdraw', elements.typeWithdraw, elements.typeTransfer));
-        }
-
-        async function fetchExchangeRates() {
-            const cacheName = 'momo-calculator-exchange-rates';
-            const cacheTTL = 60 * 60 * 1000;
-
-            try {
-                const raw = localStorage.getItem(cacheName);
-                if (raw) {
-                    const parsed = JSON.parse(raw);
-                    const age = Date.now() - parsed.timestamp;
-                    if (age < cacheTTL) {
-                        state.exchangeRates = { ...state.exchangeRates, ...parsed.rates };
-                    }
-                }
-            } catch (error) {
-                // Ignore non-fatal cache issues.
-            }
-
-            try {
-                const response = await fetch('https://open.er-api.com/v6/latest/USD');
-                if (!response.ok) {
-                    throw new Error('Unable to fetch rates');
-                }
-
-                const payload = await response.json();
-                if (payload && payload.rates) {
-                    state.exchangeRates = { ...state.exchangeRates, ...payload.rates };
-                    try {
-                        localStorage.setItem(cacheName, JSON.stringify({
-                            timestamp: Date.now(),
-                            rates: payload.rates
-                        }));
-                    } catch (error) {
-                        // Ignore write failures.
-                    }
-                    if (elements.exchangeBadge) {
-                        elements.exchangeBadge.classList.remove('hidden');
-                    }
-                }
-            } catch (error) {
-                if (elements.exchangeBadge) {
-                    elements.exchangeBadge.textContent = 'Using fallback FX rates';
-                    elements.exchangeBadge.classList.remove('hidden');
-                }
-            }
-        }
-
-        function init() {
-            setupEventListeners();
-            populateNetworks(elements.countrySelect, elements.networkSelect);
-            populateNetworks(elements.destCountrySelect, elements.destNetworkSelect);
-            fetchExchangeRates();
-            calculate();
-        }
-
-        init();
-    </script>
-</body>
-</html>
+  document.addEventListener('DOMContentLoaded', init);
+</script>
