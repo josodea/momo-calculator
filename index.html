@@ -1,881 +1,627 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>East African Mobile Money Calculator</title>
-  <meta name="description" content="Premium calculator for cross-border and domestic mobile money fees across East Africa." />
+
+  <meta name="description" content="Simulate cross-border remittances and domestic mobile money fees across East Africa for UG, KE, TZ, and RW." />
+  <meta name="keywords" content="East African Mobile Money Calculator, mobile money fees, momo calculator, cross-border remittance" />
   <meta name="robots" content="index, follow" />
-  <script src="https://cdn.tailwindcss.com" defer></script>
+
+  <!-- Tailwind Play CDN for quick styling (blue theme) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    :root {
-      --bg: #0f172a;
-      --bg-soft: #111827;
-      --panel: rgba(15, 23, 42, 0.82);
-      --panel-2: rgba(17, 24, 39, 0.98);
-      --line: rgba(148, 163, 184, 0.18);
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --primary: #7c3aed;
-      --primary-2: #4f46e5;
-      --amber: #fbbf24;
-      --success: #34d399;
-      --danger: #f87171;
-      --shadow: 0 24px 60px rgba(76, 29, 149, 0.2);
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      background:
-        radial-gradient(circle at top left, rgba(124, 58, 237, 0.22), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.16), transparent 26%),
-        var(--bg);
-      color: var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .panel {
-      background: rgba(15, 23, 42, 0.78);
-      border: 1px solid var(--line);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-
-    .field {
-      width: 100%;
-      border-radius: 0.9rem;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--text);
-      padding: 0.8rem 1rem;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-    }
-
-    .field:focus {
-      outline: none;
-      border-color: rgba(124, 58, 237, 0.9);
-      box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.14);
-    }
-
-    .toggle-btn {
-      border-radius: 0.8rem;
-      padding: 0.75rem 0.9rem;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-    }
-
-    .toggle-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: white;
-      box-shadow: 0 10px 24px rgba(124, 58, 237, 0.26);
-    }
-
-    .toggle-btn.inactive {
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--muted);
-      border-color: rgba(148, 163, 184, 0.12);
-    }
-
-    .summary-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.35rem 0;
-    }
-
-    .summary-label {
-      color: var(--muted);
-      font-size: 0.875rem;
-    }
-
-    .summary-value {
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
+    /* Slim scrollbar for aesthetic */
+    ::-webkit-scrollbar { width: 8px; height:8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #93c5fd; border-radius: 999px; }
+    /* Page layout grid with ad columns (hidden on small screens) */
+    .layout-grid { display: grid; grid-template-columns: 220px 1fr 220px; gap: 18px; max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+    @media (max-width: 960px) { .layout-grid { grid-template-columns: 1fr; } .ad-col { display: none; } }
+    /* Small utility */
+    .muted { color: #64748b; }
   </style>
 </head>
+<body class="bg-sky-50 text-slate-800 antialiased font-sans">
 
-<body>
-  <header class="px-4 py-6">
-    <div class="mx-auto max-w-6xl">
-      <div class="panel flex items-center justify-between gap-4 rounded-2xl px-5 py-4">
-        <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-2xl shadow-lg">
-            📊
-          </div>
-          <div>
-            <h1 class="text-2xl font-bold tracking-tight text-slate-100">East African Mobile Money Calculator</h1>
-            <p class="text-xs text-slate-400">Domestic & Cross-Border Fee Engine</p>
-          </div>
-        </div>
-
-        <div id="exchange-badge" class="hidden rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-200">
-          Live FX rates enabled
+  <header class="bg-sky-700 text-white py-6 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="text-3xl">📊</div>
+        <div>
+          <h1 class="text-xl font-bold">East African Mobile Money Calculator</h1>
+          <p class="text-sm text-sky-200">Cross-border remittances • Tier-bracket tariff engine</p>
         </div>
       </div>
+
+      <div id="exchange-badge" class="hidden bg-sky-800/60 text-xs px-3 py-1.5 rounded-full border border-sky-600">Rates auto-updated</div>
     </div>
   </header>
 
-  <main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-10">
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
-      <section class="panel rounded-2xl p-6 md:col-span-2">
-        <div class="mb-5 flex items-center justify-between gap-4 border-b border-slate-700 pb-3">
-          <h2 class="text-lg font-semibold text-slate-100">Transaction Workflow</h2>
+  <main class="layout-grid">
 
-          <div class="flex gap-2 rounded-xl bg-slate-900/80 p-1">
-            <button id="mode-local" class="toggle-btn active">Domestic</button>
-            <button id="mode-cross" class="toggle-btn inactive">Cross-Border</button>
-          </div>
+    <!-- Left Ad Column -->
+    <aside class="ad-col bg-white rounded-lg shadow-sm p-4 border border-slate-100">
+      <div class="h-56 flex items-center justify-center text-slate-400">Ad space - left</div>
+    </aside>
+
+    <!-- Main Calculator Column -->
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <!-- Controls -->
+      <div class="flex flex-col md:flex-row md:items-end md:gap-6 gap-4">
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Sender Country</label>
+          <select id="country-select" class="w-full rounded-xl border px-3 py-2 bg-slate-50 focus:outline-none">
+            <option value="UG">Uganda (UGX)</option>
+            <option value="KE">Kenya (KES)</option>
+            <option value="TZ">Tanzania (TZS)</option>
+            <option value="RW">Rwanda (RWF)</option>
+          </select>
         </div>
 
-        <div class="space-y-5">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label for="country-select" id="origin-label" class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Sender Country
-              </label>
-              <select id="country-select" class="field"></select>
-            </div>
-
-            <div>
-              <label for="network-select" class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Sending Wallet Provider
-              </label>
-              <select id="network-select" class="field"></select>
-            </div>
-          </div>
-
-          <div id="destination-corridor-box" class="hidden grid-cols-1 gap-4 sm:grid-cols-2 rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-4">
-            <div>
-              <label for="dest-country-select" class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Recipient Country
-              </label>
-              <select id="dest-country-select" class="field"></select>
-            </div>
-
-            <div>
-              <label for="dest-network-select" class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Receiving Network
-              </label>
-              <select id="dest-network-select" class="field"></select>
-            </div>
-          </div>
-
-          <div id="tx-type-container">
-            <label class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Transaction Type
-            </label>
-            <div class="grid grid-cols-2 gap-2 rounded-xl bg-slate-900/70 p-1">
-              <button id="type-transfer" class="toggle-btn active">Send Money</button>
-              <button id="type-withdraw" class="toggle-btn inactive">Withdrawal</button>
-            </div>
-          </div>
-
-          <div>
-            <label for="amount-input" class="mb-2 block text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Amount to Process
-            </label>
-            <div class="relative">
-              <span id="currency-addon" class="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">UGX</span>
-              <input
-                id="amount-input"
-                type="number"
-                min="1"
-                step="1"
-                placeholder="Enter amount"
-                class="field pl-16 pr-4 text-lg font-semibold"
-              />
-            </div>
-            <div id="tier-badge" class="mt-2 hidden inline-flex items-center rounded-full border border-slate-700 bg-slate-800/80 px-2.5 py-1 text-[11px] font-medium text-slate-300">
-              Tier range tracker
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <aside class="panel rounded-2xl p-6">
-        <div class="mb-5 border-b border-slate-700 pb-3">
-          <h2 class="text-lg font-semibold text-slate-100">Financial Output</h2>
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Network (sending)</label>
+          <select id="network-select" class="w-full rounded-xl border px-3 py-2 bg-slate-50 focus:outline-none"></select>
         </div>
 
-        <div class="space-y-4">
-          <div class="summary-row">
-            <span class="summary-label">Base Principal</span>
-            <span id="breakdown-base" class="summary-value">0.00</span>
-          </div>
-
-          <div class="summary-row">
-            <span id="label-fee" class="summary-label">Tier Fee Charge</span>
-            <span id="breakdown-fee" class="summary-value text-amber-400">0.00</span>
-          </div>
-
-          <div id="tax-row" class="summary-row">
-            <span id="label-tax" class="summary-label">Government Tax</span>
-            <span id="breakdown-tax" class="summary-value text-amber-400">0.00</span>
-          </div>
-
-          <div id="remittance-fields" class="hidden space-y-4 border-t border-dashed border-slate-700 pt-4">
-            <div class="rounded-xl border border-amber-400/20 bg-amber-500/5 p-3">
-              <div class="mb-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-300">
-                Applied Remittance Cross-Rate
-              </div>
-              <div id="breakdown-fx-rate" class="text-sm font-bold text-amber-200">1 UGX = 0.00 KES</div>
-            </div>
-
-            <div class="rounded-xl border border-emerald-400/20 bg-emerald-500/5 p-3">
-              <div class="mb-1 text-sm font-semibold text-emerald-300">Net Recipient Payout</div>
-              <div id="breakdown-dest-payout" class="text-xl font-bold text-emerald-300">0.00</div>
-            </div>
-          </div>
-
-          <hr class="border-slate-700" />
-
-          <div class="pt-1">
-            <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              <span id="label-total">Total Sender Outlay</span>
-            </div>
-            <div id="breakdown-total" class="text-3xl font-bold text-violet-400">0.00</div>
+        <div class="flex-1">
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Transaction Type</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="type-transfer" class="py-2 rounded-xl bg-sky-600 text-white">Send / P2P</button>
+            <button id="type-withdraw" class="py-2 rounded-xl bg-white text-slate-700 border">Agent Withdrawal</button>
           </div>
         </div>
+      </div>
 
-        <div id="usd-cross-container" class="mt-6 hidden rounded-xl border border-slate-700 bg-slate-900/70 p-4">
-          <div class="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Global Valuation Reference</div>
-          <div class="mt-2 flex items-center justify-between">
-            <span class="text-xs text-slate-400">Value in USD</span>
-            <span id="usd-cross-value" class="text-sm font-semibold text-slate-200">$0.00</span>
+      <!-- Cross-border toggle & destination -->
+      <div class="mt-4 flex items-center gap-4">
+        <label class="inline-flex items-center gap-2">
+          <input id="mode-cross" type="checkbox" class="rounded border-slate-300" />
+          <span class="text-sm text-slate-600">Cross-border remittance</span>
+        </label>
+
+        <div id="dest-controls" class="hidden flex items-center gap-3 ml-2">
+          <select id="dest-country-select" class="rounded-xl border px-3 py-2 bg-slate-50">
+            <option value="KE">Kenya (KES)</option>
+            <option value="UG">Uganda (UGX)</option>
+            <option value="TZ">Tanzania (TZS)</option>
+            <option value="RW">Rwanda (RWF)</option>
+          </select>
+
+          <select id="dest-network-select" class="rounded-xl border px-3 py-2 bg-slate-50"></select>
+        </div>
+      </div>
+
+      <!-- Amount / Input -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Amount</label>
+          <div class="relative">
+            <span id="currency-addon" class="absolute left-3 top-1/2 -translate-y-1/2 font-semibold text-slate-500 text-sm">UGX</span>
+            <input id="amount-input" type="number" min="1" placeholder="Enter amount" class="w-full rounded-xl border pl-16 pr-4 py-3 text-lg font-semibold bg-white" />
+          </div>
+          <p id="validation-msg" class="text-xs text-red-600 mt-2 hidden"></p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 uppercase mb-2">Matched Tier</label>
+          <div id="tier-badge" class="rounded-xl bg-sky-50 px-3 py-3 text-sm text-slate-700">—</div>
+        </div>
+      </div>
+
+      <!-- Output breakdown -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-slate-50 rounded-xl p-4">
+          <div class="flex justify-between"><span class="muted">Base Amount</span><strong id="breakdown-base">0.00</strong></div>
+          <div class="flex justify-between mt-2"><span class="muted">Provider Fee</span><strong id="breakdown-fee" class="text-amber-600">0.00</strong></div>
+          <div class="flex justify-between mt-2"><span class="muted" id="label-tax">Government Tax</span><strong id="breakdown-tax" class="text-amber-600">0.00</strong></div>
+          <hr class="my-3" />
+          <div class="flex justify-between"><span class="text-sm font-semibold muted" id="label-total">Total Sender Outlay</span><strong id="breakdown-total" class="text-sky-700 text-lg">0.00</strong></div>
+        </div>
+
+        <div class="bg-slate-50 rounded-xl p-4">
+          <div class="flex justify-between"><span class="muted">Value in USD</span><strong id="usd-cross-value">$0.00</strong></div>
+          <div id="remittance-block" class="mt-4 hidden">
+            <div class="text-xs muted">Applied FX & Destination Payout</div>
+            <div class="mt-2 flex justify-between"><span class="muted">FX Rate</span><strong id="breakdown-fx-rate">—</strong></div>
+            <div class="mt-2 flex justify-between"><span class="muted">Recipient Payout</span><strong id="breakdown-dest-payout">0.00</strong></div>
           </div>
         </div>
-      </aside>
-    </div>
+      </div>
+
+      <div class="mt-4 text-xs muted">Note: Global transaction limits and regulatory levies enforced.</div>
+    </section>
+
+    <!-- Right Ad Column -->
+    <aside class="ad-col bg-white rounded-lg shadow-sm p-4 border border-slate-100">
+      <div class="h-56 flex items-center justify-center text-slate-400">Ad space - right</div>
+    </aside>
   </main>
 
-  <footer class="px-4 pb-8">
-    <div class="mx-auto max-w-6xl text-center text-xs text-slate-500">
-      © 2026 East African Mobile Money Fee Engine.
-    </div>
+  <footer class="max-w-6xl mx-auto px-4 py-6 text-xs text-slate-500">
+    © 2026 East African Mobile Money Calculator. All tariffs indicative.
   </footer>
 
-  <script>
-    (() => {
-      const countryData = {
-        UG: {
-          currency: "UGX",
-          networks: {
-            "MTN MoMo": {
-              taxRateTransfer: 0.005,
-              taxRateWithdraw: 0.0,
-              tiersTransfer: [
-                { min: 1, max: 2500, fee: 100 },
-                { min: 2501, max: 5000, fee: 250 },
-                { min: 5001, max: 15000, fee: 450 },
-                { min: 15001, max: 30000, fee: 600 },
-                { min: 30001, max: 45000, fee: 800 },
-                { min: 45001, max: 60000, fee: 1000 },
-                { min: 60001, max: 125000, fee: 1250 },
-                { min: 125001, max: 250000, fee: 1500 },
-                { min: 250001, max: 500000, fee: 1750 },
-                { min: 500001, max: 1000000, fee: 2000 },
-                { min: 1000001, max: 2000000, fee: 2200 },
-                { min: 2000001, max: 4000000, fee: 2500 },
-                { min: 4000001, max: 7000000, fee: 3000 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 2500, fee: 350 },
-                { min: 2501, max: 5000, fee: 450 },
-                { min: 5001, max: 15000, fee: 700 },
-                { min: 15001, max: 30000, fee: 1000 },
-                { min: 30001, max: 45000, fee: 1300 },
-                { min: 45001, max: 60000, fee: 1750 },
-                { min: 60001, max: 125000, fee: 2125 },
-                { min: 125001, max: 250000, fee: 3875 },
-                { min: 250001, max: 500000, fee: 5500 },
-                { min: 500001, max: 1000000, fee: 7500 },
-                { min: 1000001, max: 2000000, fee: 12500 },
-                { min: 2000001, max: 4000000, fee: 15000 },
-                { min: 4000001, max: 7000000, fee: 20000 }
-              ]
-            },
-            "Airtel Money": {
-              taxRateTransfer: 0.005,
-              taxRateWithdraw: 0.0,
-              tiersTransfer: [
-                { min: 1, max: 2500, fee: 90 },
-                { min: 2501, max: 5000, fee: 230 },
-                { min: 5001, max: 15000, fee: 400 },
-                { min: 15001, max: 30000, fee: 550 },
-                { min: 30001, max: 45000, fee: 750 },
-                { min: 45001, max: 60000, fee: 900 },
-                { min: 60001, max: 125000, fee: 1100 },
-                { min: 125001, max: 250000, fee: 1350 },
-                { min: 250001, max: 500000, fee: 1600 },
-                { min: 500001, max: 1000000, fee: 1800 },
-                { min: 1000001, max: 2000000, fee: 2000 },
-                { min: 2000001, max: 4000000, fee: 2300 },
-                { min: 4000001, max: 7000000, fee: 2800 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 2500, fee: 330 },
-                { min: 2501, max: 5000, fee: 400 },
-                { min: 5001, max: 15000, fee: 650 },
-                { min: 15001, max: 30000, fee: 900 },
-                { min: 30001, max: 45000, fee: 1200 },
-                { min: 45001, max: 60000, fee: 1600 },
-                { min: 60001, max: 125000, fee: 2000 },
-                { min: 125001, max: 250000, fee: 3600 },
-                { min: 250001, max: 500000, fee: 5200 },
-                { min: 500001, max: 1000000, fee: 7000 },
-                { min: 1000001, max: 2000000, fee: 12000 },
-                { min: 2000001, max: 4000000, fee: 14500 },
-                { min: 4000001, max: 7000000, fee: 19000 }
-              ]
-            }
-          }
-        },
+  <!-- Logic (module for scope, modern pattern) -->
+  <script type="module">
+    // --- TARIFF DATA: Use the JSON payload you provided (reduced to the 4 countries) ---
+    const TARIFF_DATA = [
+      {
+        "country": "Uganda",
+        "country_code": "UG",
+        "currency": "UGX",
+        "global_limits": { "min_transaction": 500, "max_transaction": 5000000 },
+        "regulatory_rules": { "statutory_withdrawal_tax_rate": 0.005, "tax_description": "0.5% statutory government excise tax calculated on the principal amount, layered on top of the provider base fee." },
+        "cross_border_remittance": { "airtel_money_east_africa_flat_promo": 1000, "mtn_momo_average_percentage_fee": 0.0125 },
+        "tariff_matrix": [
+          { "min_limit": 500, "max_limit": 2500, "mtn_p2p_fee": 100, "airtel_p2p_fee": 100, "agent_withdrawal_base_fee": 330 },
+          { "min_limit": 2501, "max_limit": 5000, "mtn_p2p_fee": 200, "airtel_p2p_fee": 200, "agent_withdrawal_base_fee": 440 },
+          { "min_limit": 5001, "max_limit": 15000, "mtn_p2p_fee": 450, "airtel_p2p_fee": 400, "agent_withdrawal_base_fee": 700 },
+          { "min_limit": 15001, "max_limit": 30000, "mtn_p2p_fee": 500, "airtel_p2p_fee": 500, "agent_withdrawal_base_fee": 880 },
+          { "min_limit": 30001, "max_limit": 45000, "mtn_p2p_fee": 800, "airtel_p2p_fee": 700, "agent_withdrawal_base_fee": 1100 },
+          { "min_limit": 45011, "max_limit": 60000, "mtn_p2p_fee": 1000, "airtel_p2p_fee": 800, "agent_withdrawal_base_fee": 1320 },
+          { "min_limit": 60001, "max_limit": 125000, "mtn_p2p_fee": 1500, "airtel_p2p_fee": 1000, "agent_withdrawal_base_fee": 2200 },
+          { "min_limit": 125001, "max_limit": 250000, "mtn_p2p_fee": 1800, "airtel_p2p_fee": 1500, "agent_withdrawal_base_fee": 3300 },
+          { "min_limit": 250001, "max_limit": 500000, "mtn_p2p_fee": 2500, "airtel_p2p_fee": 2000, "agent_withdrawal_base_fee": 5500 },
+          { "min_limit": 500001, "max_limit": 1000000, "mtn_p2p_fee": 4500, "airtel_p2p_fee": 4000, "agent_withdrawal_base_fee": 7500 },
+          { "min_limit": 1000001, "max_limit": 2000000, "mtn_p2p_fee": 7000, "airtel_p2p_fee": 6000, "agent_withdrawal_base_fee": 12500 },
+          { "min_limit": 2000001, "max_limit": 5000000, "mtn_p2p_fee": 10000, "airtel_p2p_fee": 9000, "agent_withdrawal_base_fee": 15000 }
+        ]
+      },
+      {
+        "country": "Kenya",
+        "country_code": "KE",
+        "currency": "KES",
+        "global_limits": { "min_transaction": 10, "max_transaction": 250000, "daily_account_limit": 500000 },
+        "regulatory_rules": { "built_in_excise_duty_rate": 0.15, "tax_description": "15% Kenyan excise duty on mobile money services is incorporated in fees." },
+        "tariff_matrix": [
+          { "min_limit": 1, "max_limit": 49, "safaricom_p2p_fee": 0, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 0, "airtel_withdrawal_fee": 0 },
+          { "min_limit": 50, "max_limit": 100, "safaricom_p2p_fee": 0, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 11, "airtel_withdrawal_fee": 11 },
+          { "min_limit": 101, "max_limit": 500, "safaricom_p2p_fee": 7, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 29, "airtel_withdrawal_fee": 28 },
+          { "min_limit": 501, "max_limit": 1000, "safaricom_p2p_fee": 13, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 29, "airtel_withdrawal_fee": 28 },
+          { "min_limit": 1001, "max_limit": 1500, "safaricom_p2p_fee": 23, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 30, "airtel_withdrawal_fee": 29 },
+          { "min_limit": 1501, "max_limit": 2500, "safaricom_p2p_fee": 33, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 30, "airtel_withdrawal_fee": 29 },
+          { "min_limit": 2501, "max_limit": 3500, "safaricom_p2p_fee": 53, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 52, "airtel_withdrawal_fee": 50 },
+          { "min_limit": 3501, "max_limit": 5000, "safaricom_p2p_fee": 53, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 69, "airtel_withdrawal_fee": 67 },
+          { "min_limit": 5001, "max_limit": 7500, "safaricom_p2p_fee": 77, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 87, "airtel_withdrawal_fee": 84 },
+          { "min_limit": 7501, "max_limit": 10000, "safaricom_p2p_fee": 90, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 115, "airtel_withdrawal_fee": 110 },
+          { "min_limit": 10001, "max_limit": 15000, "safaricom_p2p_fee": 100, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 167, "airtel_withdrawal_fee": 160 },
+          { "min_limit": 15001, "max_limit": 20000, "safaricom_p2p_fee": 105, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 185, "airtel_withdrawal_fee": 176 },
+          { "min_limit": 20001, "max_limit": 35000, "safaricom_p2p_fee": 105, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 197, "airtel_withdrawal_fee": 187 },
+          { "min_limit": 35001, "max_limit": 50000, "safaricom_p2p_fee": 105, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 278, "airtel_withdrawal_fee": 270 },
+          { "min_limit": 50001, "max_limit": 250000, "safaricom_p2p_fee": 108, "airtel_p2p_fee": 0, "safaricom_withdrawal_fee": 309, "airtel_withdrawal_fee": 300 }
+        ],
+        "cross_border_matrix": [
+          { "min_limit": 101, "max_limit": 500, "m_pesa_global_fee": 10, "airtel_money_regional_fee": 8 },
+          { "min_limit": 501, "max_limit": 1000, "m_pesa_global_fee": 26, "airtel_money_regional_fee": 15 },
+          { "min_limit": 1001, "max_limit": 5000, "m_pesa_global_fee": 62, "airtel_money_regional_fee": 45 },
+          { "min_limit": 5001, "max_limit": 10000, "m_pesa_global_fee": 112, "airtel_money_regional_fee": 80 },
+          { "min_limit": 10001, "max_limit": 20000, "m_pesa_global_fee": 215, "airtel_money_regional_fee": 150 },
+          { "min_limit": 20001, "max_limit": 250000, "m_pesa_global_fee": 220, "airtel_money_regional_fee": 190 }
+        ]
+      },
+      {
+        "country": "Tanzania",
+        "country_code": "TZ",
+        "currency": "TZS",
+        "global_limits": { "min_transaction": 100, "max_transaction": 5000000 },
+        "regulatory_rules": { "airtel_bila_tozo_max_threshold": 29999, "description": "Airtel Tanzania 'Bila Tozo' waives some fees under threshold." },
+        "tariff_matrix": [
+          { "min_limit": 10, "max_limit": 999, "on_net_p2p_fee": 15, "cross_net_p2p_fee": 30, "cumulative_withdrawal_fee": 185 },
+          { "min_limit": 1000, "max_limit": 1999, "on_net_p2p_fee": 25, "cross_net_p2p_fee": 60, "cumulative_withdrawal_fee": 320 },
+          { "min_limit": 2000, "max_limit": 4999, "on_net_p2p_fee": 75, "cross_net_p2p_fee": 120, "cumulative_withdrawal_fee": 450 },
+          { "min_limit": 5000, "max_limit": 9999, "on_net_p2p_fee": 150, "cross_net_p2p_fee": 350, "cumulative_withdrawal_fee": 850 },
+          { "min_limit": 10000, "max_limit": 19999, "on_net_p2p_fee": 250, "cross_net_p2p_fee": 650, "cumulative_withdrawal_fee": 1400 },
+          { "min_limit": 20000, "max_limit": 39999, "on_net_p2p_fee": 450, "cross_net_p2p_fee": 900, "cumulative_withdrawal_fee": 2100 },
+          { "min_limit": 40000, "max_limit": 49999, "on_net_p2p_fee": 550, "cross_net_p2p_fee": 1200, "cumulative_withdrawal_fee": 2600 },
+          { "min_limit": 50000, "max_limit": 99999, "on_net_p2p_fee": 800, "cross_net_p2p_fee": 1800, "cumulative_withdrawal_fee": 3900 },
+          { "min_limit": 100000, "max_limit": 199999, "on_net_p2p_fee": 1200, "cross_net_p2p_fee": 3200, "cumulative_withdrawal_fee": 5500 },
+          { "min_limit": 200000, "max_limit": 499999, "on_net_p2p_fee": 2500, "cross_net_p2p_fee": 5500, "cumulative_withdrawal_fee": 7800 },
+          { "min_limit": 500000, "max_limit": 999999, "on_net_p2p_fee": 4500, "cross_net_p2p_fee": 8500, "cumulative_withdrawal_fee": 9500 },
+          { "min_limit": 1000000, "max_limit": 5000000, "on_net_p2p_fee": 7500, "cross_net_p2p_fee": 14000, "cumulative_withdrawal_fee": 12000 }
+        ]
+      },
+      {
+        "country": "Rwanda",
+        "country_code": "RW",
+        "currency": "RWF",
+        "global_limits": { "min_transaction": 10, "max_transaction": 5000000 },
+        "regulatory_rules": { "interoperability_framework": "eKash", "regional_outbound_p2p_cap": 2500 },
+        "tariff_matrix": [
+          { "min_limit": 1, "max_limit": 1000, "ekash_on_net_p2p": 20, "ekash_off_net_p2p": 50, "agent_cash_out_fee": 100 },
+          { "min_limit": 1001, "max_limit": 5000, "ekash_on_net_p2p": 100, "ekash_off_net_p2p": 200, "agent_cash_out_fee": 250 },
+          { "min_limit": 5001, "max_limit": 10000, "ekash_on_net_p2p": 250, "ekash_off_net_p2p": 400, "agent_cash_out_fee": 400 },
+          { "min_limit": 10010, "max_limit": 20000, "ekash_on_net_p2p": 400, "ekash_off_net_p2p": 700, "agent_cash_out_fee": 650 },
+          { "min_limit": 20001, "max_limit": 50000, "ekash_on_net_p2p": 600, "ekash_off_net_p2p": 1200, "agent_cash_out_fee": 1000 },
+          { "min_limit": 50010, "max_limit": 100000, "ekash_on_net_p2p": 1000, "ekash_off_net_p2p": 2000, "agent_cash_out_fee": 1800 },
+          { "min_limit": 100001, "max_limit": 500000, "ekash_on_net_p2p": 1500, "ekash_off_net_p2p": 3500, "agent_cash_out_fee": 4000 },
+          { "min_limit": 500001, "max_limit": 1000000, "ekash_on_net_p2p": 1500, "ekash_off_net_p2p": 5000, "agent_cash_out_fee": 7500 },
+          { "min_limit": 1000001, "max_limit": 5000000, "ekash_on_net_p2p": 1500, "ekash_off_net_p2p": 7500, "agent_cash_out_fee": 10000 }
+        ]
+      }
+    ];
 
-        KE: {
-          currency: "KES",
-          networks: {
-            "Safaricom M-Pesa": {
-              taxRateTransfer: 0.12,
-              taxRateWithdraw: 0.12,
-              tiersTransfer: [
-                { min: 1, max: 100, fee: 0 },
-                { min: 101, max: 500, fee: 7 },
-                { min: 501, max: 1000, fee: 13 },
-                { min: 1001, max: 1500, fee: 23 },
-                { min: 1501, max: 2500, fee: 33 },
-                { min: 2501, max: 3500, fee: 53 },
-                { min: 3501, max: 5000, fee: 57 },
-                { min: 5001, max: 7500, fee: 77 },
-                { min: 7501, max: 10000, fee: 89 },
-                { min: 10001, max: 15000, fee: 99 },
-                { min: 15001, max: 20000, fee: 102 },
-                { min: 20001, max: 250000, fee: 105 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 49, fee: 0 },
-                { min: 50, max: 100, fee: 11 },
-                { min: 101, max: 500, fee: 28 },
-                { min: 501, max: 1000, fee: 29 },
-                { min: 1001, max: 1500, fee: 30 },
-                { min: 1501, max: 2500, fee: 34 },
-                { min: 2501, max: 3500, fee: 52 },
-                { min: 3501, max: 5000, fee: 69 },
-                { min: 5001, max: 7500, fee: 87 },
-                { min: 7501, max: 10000, fee: 115 },
-                { min: 10001, max: 15000, fee: 167 },
-                { min: 15001, max: 20000, fee: 185 },
-                { min: 20001, max: 35000, fee: 198 },
-                { min: 35001, max: 50000, fee: 275 },
-                { min: 50001, max: 250000, fee: 309 }
-              ]
-            }
-          }
-        },
+    // --- PERFORMANCE: cache DOM refs once ---
+    const Q = selector => document.querySelector(selector);
+    const countrySelect = Q('#country-select');
+    const networkSelect = Q('#network-select');
+    const destCountrySelect = Q('#dest-country-select');
+    const destNetworkSelect = Q('#dest-network-select');
+    const modeCross = Q('#mode-cross');
+    const destControls = Q('#dest-controls');
+    const amountInput = Q('#amount-input');
+    const currencyAddon = Q('#currency-addon');
+    const typeTransferBtn = Q('#type-transfer');
+    const typeWithdrawBtn = Q('#type-withdraw');
+    const tierBadge = Q('#tier-badge');
+    const validationMsg = Q('#validation-msg');
 
-        TZ: {
-          currency: "TZS",
-          networks: {
-            "Vodacom M-Pesa": {
-              taxRateTransfer: 0.0,
-              taxRateWithdraw: 0.0,
-              tiersTransfer: [
-                { min: 1, max: 999, fee: 10 },
-                { min: 1000, max: 4999, fee: 45 },
-                { min: 5000, max: 9999, fee: 150 },
-                { min: 10000, max: 49999, fee: 320 },
-                { min: 50000, max: 199999, fee: 650 },
-                { min: 200000, max: 999999, fee: 1200 },
-                { min: 1000000, max: 5000000, fee: 3000 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 999, fee: 20 },
-                { min: 1000, max: 4999, fee: 150 },
-                { min: 5000, max: 9999, fee: 350 },
-                { min: 10000, max: 49999, fee: 950 },
-                { min: 50000, max: 199999, fee: 2300 },
-                { min: 200000, max: 999999, fee: 4700 },
-                { min: 1000000, max: 5000000, fee: 8500 }
-              ]
-            }
-          }
-        },
+    const breakdownBase = Q('#breakdown-base');
+    const breakdownFee = Q('#breakdown-fee');
+    const breakdownTax = Q('#breakdown-tax');
+    const breakdownTotal = Q('#breakdown-total');
+    const usdCrossValue = Q('#usd-cross-value');
+    const breakdownFxRate = Q('#breakdown-fx-rate');
+    const breakdownDestPayout = Q('#breakdown-dest-payout');
+    const remittanceBlock = Q('#remittance-block');
+    const exchangeBadge = Q('#exchange-badge');
+    const labelTax = Q('#label-tax');
+    const labelTotal = Q('#label-total');
 
-        RW: {
-          currency: "RWF",
-          networks: {
-            "MTN MoMo": {
-              taxRateTransfer: 0.0,
-              taxRateWithdraw: 0.0,
-              tiersTransfer: [
-                { min: 1, max: 1000, fee: 0 },
-                { min: 1001, max: 10000, fee: 100 },
-                { min: 10001, max: 100000, fee: 250 },
-                { min: 100001, max: 500000, fee: 500 },
-                { min: 500001, max: 3000000, fee: 1000 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 1000, fee: 25 },
-                { min: 1001, max: 10000, fee: 150 },
-                { min: 10001, max: 100000, fee: 600 },
-                { min: 100001, max: 500000, fee: 1500 },
-                { min: 500001, max: 3000000, fee: 4000 }
-              ]
-            }
-          }
-        },
+    // --- small helper: map by country_code for quick lookup ---
+    const byCode = Object.fromEntries(TARIFF_DATA.map(d => [d.country_code, d]));
 
-        CD: {
-          currency: "CDF",
-          networks: {
-            "Orange Money": {
-              taxRateTransfer: 0.0,
-              taxRateWithdraw: 0.0,
-              tiersTransfer: [
-                { min: 1, max: 1000, fee: 30 },
-                { min: 1001, max: 10000, fee: 120 },
-                { min: 10001, max: 100000, fee: 300 },
-                { min: 100001, max: 500000, fee: 700 },
-                { min: 500001, max: 5000000, fee: 1500 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 1000, fee: 70 },
-                { min: 1001, max: 10000, fee: 220 },
-                { min: 10001, max: 100000, fee: 500 },
-                { min: 100001, max: 500000, fee: 1000 },
-                { min: 500001, max: 5000000, fee: 2500 }
-              ]
-            }
-          }
-        },
+    // Build networks available for each country from tariff matrices for simpler UI
+    const networksPerCountry = {
+      UG: ['MTN MoMo', 'Airtel Money'],
+      KE: ['Safaricom M-Pesa', 'Airtel Money'],
+      TZ: ['Vodacom M-Pesa', 'Airtel Money'],
+      RW: ['MTN MoMo', 'eKash']
+    };
 
-        SS: {
-          currency: "SSP",
-          networks: {
-            "m-Gurush": {
-              taxRateTransfer: 0.0,
-              taxRateWithdraw: 0.0,
-              tiersTransfer: [
-                { min: 1, max: 1000, fee: 20 },
-                { min: 1001, max: 10000, fee: 80 },
-                { min: 10001, max: 100000, fee: 250 },
-                { min: 100001, max: 500000, fee: 600 },
-                { min: 500001, max: 1000000, fee: 900 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 1000, fee: 60 },
-                { min: 1001, max: 10000, fee: 160 },
-                { min: 10001, max: 100000, fee: 320 },
-                { min: 100001, max: 500000, fee: 820 },
-                { min: 500001, max: 1000000, fee: 1600 }
-              ]
-            }
-          }
-        },
+    // Intl formatters cache (lazy)
+    const nfCache = {};
+    function currencyFormatter(code) {
+      if (!nfCache[code]) nfCache[code] = new Intl.NumberFormat(undefined, { style: 'currency', currency: code, maximumFractionDigits: 0 });
+      return nfCache[code];
+    }
+    const usdFormatter = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
 
-        ET: {
-          currency: "ETB",
-          networks: {
-            "Ethio Telecom Telebirr": {
-              taxRateTransfer: 0.0,
-              taxRateWithdraw: 0.0,
-              tiersTransfer: [
-                { min: 1, max: 500, fee: 10 },
-                { min: 501, max: 5000, fee: 50 },
-                { min: 5001, max: 50000, fee: 120 },
-                { min: 50001, max: 500000, fee: 350 }
-              ],
-              tiersWithdraw: [
-                { min: 1, max: 500, fee: 20 },
-                { min: 501, max: 5000, fee: 80 },
-                { min: 5001, max: 50000, fee: 200 },
-                { min: 50001, max: 500000, fee: 500 }
-              ]
-            }
+    // Exchange rates (currency -> rate) cached here; fetch once
+    let exchangeRates = { USD: 1 };
+
+    async function fetchExchangeRatesOnce() {
+      try {
+        const r = await fetch('https://open.er-api.com/v6/latest/USD');
+        if (!r.ok) throw new Error('fetch failed');
+        const data = await r.json();
+        exchangeRates = data.rates || exchangeRates;
+        exchangeBadge.classList.remove('hidden');
+      } catch (e) {
+        // graceful fallback: common rates (approx)
+        exchangeRates = { USD: 1, UGX: 3700, KES: 129, TZS: 2500, RWF: 1260 };
+      }
+    }
+
+    // --- Utility: find tariff tier quickly (linear scan is fine because arrays are small) ---
+    function findTier(amount, tariffMatrix) {
+      if (!Array.isArray(tariffMatrix)) return null;
+      for (let i = 0; i < tariffMatrix.length; i++) {
+        const tier = tariffMatrix[i];
+        if (amount >= (tier.min_limit ?? 0) && amount <= (tier.max_limit ?? Number.POSITIVE_INFINITY)) return tier;
+      }
+      return null;
+    }
+
+    // --- UI population helpers (use fragments to avoid reflows) ---
+    function populateNetworks(countryCode, selectEl) {
+      const nets = networksPerCountry[countryCode] || [];
+      selectEl.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      nets.forEach(net => {
+        const o = document.createElement('option');
+        o.value = net;
+        o.textContent = net;
+        frag.appendChild(o);
+      });
+      selectEl.appendChild(frag);
+    }
+
+    function updateCurrencyAddonFor(code) {
+      const cfg = byCode[code];
+      currencyAddon.textContent = cfg ? cfg.currency : '';
+    }
+
+    // --- Validation: enforce min/max from global_limits ---
+    function validateAmount(countryCode, amount) {
+      const cfg = byCode[countryCode];
+      if (!cfg) return { ok: true };
+      const min = cfg.global_limits?.min_transaction ?? 0;
+      const max = cfg.global_limits?.max_transaction ?? Number.POSITIVE_INFINITY;
+      if (amount < min) return { ok: false, message: `Min allowed: ${min.toLocaleString()} ${cfg.currency}` };
+      if (amount > max) return { ok: false, message: `Max allowed: ${max.toLocaleString()} ${cfg.currency}` };
+      return { ok: true };
+    }
+
+    // --- Main calculation logic (pure, small) ---
+    function compute({ fromCode, toCode = null, network, destNetwork = null, amount = 0, txType = 'transfer', cross = false }) {
+      const srcCfg = byCode[fromCode];
+      if (!srcCfg) return null;
+
+      // Choose provider fee depending on country & network & transaction type
+      let providerFee = 0;
+      let tax = 0;
+      let totalSender = 0;
+      let recipientPayout = null;
+      let fxRate = null;
+
+      // Domestic logic
+      if (!cross) {
+        const tier = findTier(amount, srcCfg.tariff_matrix);
+        // derive fees by mapping common keys for each country/network
+        if (fromCode === 'UG') {
+          // UG: P2P fees: mtn_p2p_fee or airtel_p2p_fee; Withdrawals use agent_withdrawal_base_fee + statutory withdrawal tax (0.5% on principal)
+          if (txType === 'transfer') {
+            providerFee = (network && tier) ? (network.includes('Airtel') ? tier.airtel_p2p_fee ?? 0 : tier.mtn_p2p_fee ?? 0) : 0;
+            tax = 0; // Ugandan tax applies only to withdrawals per your instruction
+            totalSender = amount + providerFee + tax;
+          } else {
+            providerFee = (tier && tier.agent_withdrawal_base_fee) ? tier.agent_withdrawal_base_fee : 0;
+            tax = (srcCfg.regulatory_rules?.statutory_withdrawal_tax_rate ?? 0) * amount;
+            totalSender = amount + providerFee + tax; // sender pays out amount + fees
           }
+        } else if (fromCode === 'KE') {
+          // Kenya: listed fees already include excise duty. withdrawal vs transfer choose keys
+          if (txType === 'transfer') {
+            providerFee = (tier) ? (tier.safaricom_p2p_fee ?? tier.airtel_p2p_fee ?? 0) : 0;
+            tax = 0; // Incorporated into listed fees
+            totalSender = amount + providerFee;
+          } else {
+            providerFee = (tier) ? (tier.safaricom_withdrawal_fee ?? tier.airtel_withdrawal_fee ?? 0) : 0;
+            tax = 0; // already included in fee
+            totalSender = amount + providerFee;
+          }
+        } else if (fromCode === 'TZ') {
+          if (txType === 'transfer') {
+            providerFee = (tier) ? (tier.on_net_p2p_fee ?? tier.cross_net_p2p_fee ?? 0) : 0;
+            // Airtel 'Bila Tozo' policy: waive some fees under threshold - we assume cross-checked at tariff level
+            tax = 0;
+            totalSender = amount + providerFee;
+          } else {
+            providerFee = (tier) ? (tier.cumulative_withdrawal_fee ?? 0) : 0;
+            tax = 0;
+            totalSender = amount + providerFee;
+          }
+        } else if (fromCode === 'RW') {
+          if (txType === 'transfer') {
+            providerFee = (tier) ? (tier.ekash_on_net_p2p ?? tier.ekash_off_net_p2p ?? 0) : 0;
+            tax = 0;
+            totalSender = amount + providerFee;
+          } else {
+            providerFee = (tier) ? (tier.agent_cash_out_fee ?? 0) : 0;
+            tax = 0;
+            totalSender = amount + providerFee;
+          }
+        } else {
+          providerFee = 0; tax = 0; totalSender = amount;
         }
+
+        return {
+          providerFee, tax, totalSender, recipientPayout, fxRate
+        };
+      }
+
+      // Cross-border logic
+      // Simple strategy: determine an outbound cross-fee (provider-side) then apply FX to compute recipient payout.
+      // Use srcCfg.cross_border_remittance when available, else use srcCfg.cross_border_matrix (KE) or dest's inbound rules.
+      let crossProviderFee = 0;
+      // For Uganda special cross rates from JSON (flat promo or percentage)
+      if (fromCode === 'UG') {
+        // If sending via Airtel Money use flat promo; for MTN use percentage average
+        if (network && network.includes('Airtel')) {
+          crossProviderFee = srcCfg.cross_border_remittance?.airtel_money_east_africa_flat_promo ?? 0;
+        } else {
+          crossProviderFee = (srcCfg.cross_border_remittance?.mtn_momo_average_percentage_fee ?? 0) * amount;
+        }
+      } else if (fromCode === 'KE') {
+        // use cross_border_matrix lookup
+        const crossTier = findTier(amount, srcCfg.cross_border_matrix);
+        if (crossTier) {
+          // choose mpesa fee if sending from mpesa else airtel
+          crossProviderFee = network && network.includes('Safaricom') ? (crossTier.m_pesa_global_fee ?? 0) : (crossTier.airtel_money_regional_fee ?? 0);
+        }
+      } else {
+        // For TZ & RW fallback to tariff_matrix cross fees if present
+        const t = findTier(amount, srcCfg.tariff_matrix);
+        if (t) crossProviderFee = t.cross_net_p2p_fee ?? t.on_net_p2p_fee ?? 0;
+      }
+
+      // FX: convert amount in sender currency to USD then to dest currency using exchangeRates
+      const fromCurrency = srcCfg.currency;
+      const toCfg = byCode[toCode] ?? null;
+      const toCurrency = toCfg?.currency ?? fromCurrency;
+      const fromRate = exchangeRates[fromCurrency] ?? 1;
+      const toRate = exchangeRates[toCurrency] ?? 1;
+      // USD value = amount / rate (since rates are USD -> currency); handle possible missing rates
+      let amountUsd = amount / (fromRate || 1);
+      // convert to destination currency
+      let destAmount = amountUsd * (toRate || 1);
+      // Deduct fees in sender currency first
+      const totalSenderOutlay = amount + crossProviderFee; // taxes handled at destination or included
+      // Recipient receives destAmount minus any dest-side agent fees (approx: use dest tariff matrix withdrawal fee)
+      let destWithdrawalFee = 0;
+      if (toCfg) {
+        const destTier = findTier(destAmount, toCfg.tariff_matrix);
+        // use agent cash out / withdrawal fee keys depending on dest country structure
+        destWithdrawalFee = (toCfg.country_code === 'UG') ? (destTier?.agent_withdrawal_base_fee ?? 0)
+                          : (toCfg.country_code === 'KE') ? (destTier?.safaricom_withdrawal_fee ?? destTier?.airtel_withdrawal_fee ?? 0)
+                          : (toCfg.country_code === 'TZ') ? (destTier?.cumulative_withdrawal_fee ?? 0)
+                          : (toCfg.country_code === 'RW') ? (destTier?.agent_cash_out_fee ?? 0) : 0;
+      }
+      // If Uganda destination and withdrawal tax applies on withdrawals, it's charged when recipient withdraws; for our UI show net recipient payout after typical withdrawal fee (but not statutory levy unless withdrawing)
+      recipientPayout = Math.max(0, destAmount - destWithdrawalFee);
+      // USD display
+      fxRate = toRate && fromRate ? (toRate / fromRate) : null;
+
+      return {
+        providerFee: crossProviderFee,
+        tax: 0,
+        totalSender: totalSenderOutlay,
+        recipientPayout,
+        fxRate
       };
+    }
 
-      const FALLBACK_RATES = {
-        UGX: 3710,
-        KES: 129,
-        TZS: 2510,
-        RWF: 1260,
-        CDF: 2850,
-        SSP: 130,
-        ETB: 122,
-        USD: 1
+    // --- UI update (batched via requestAnimationFrame) ---
+    let pendingUi = null;
+    function scheduleUiUpdate(data) {
+      if (pendingUi) cancelAnimationFrame(pendingUi);
+      pendingUi = requestAnimationFrame(() => {
+        pendingUi = null;
+        const { providerFee, tax, totalSender, recipientPayout, fxRate } = data;
+        const src = byCode[countrySelect.value];
+        const currency = src?.currency ?? 'USD';
+        // Format numbers
+        const curFmt = currencyFormatter(currency);
+        breakdownBase.textContent = curFmt.format(Number(amountInput.value || 0));
+        breakdownFee.textContent = curFmt.format(providerFee || 0);
+        breakdownTax.textContent = curFmt.format(tax || 0);
+        breakdownTotal.textContent = curFmt.format(totalSender || 0);
+        usdCrossValue.textContent = usdFormatter.format( (Number(amountInput.value || 0) / (exchangeRates[currency] || 1)) || 0 );
+        if (recipientPayout != null) {
+          remittanceBlock.classList.remove('hidden');
+          breakdownDestPayout.textContent = (byCode[destCountrySelect.value] ? currencyFormatter(byCode[destCountrySelect.value].currency).format(recipientPayout) : recipientPayout.toFixed(0));
+          breakdownFxRate.textContent = fxRate ? `1 ${src.currency} ≈ ${(fxRate).toFixed(6)} ${byCode[destCountrySelect.value].currency}` : '—';
+        } else {
+          remittanceBlock.classList.add('hidden');
+          breakdownDestPayout.textContent = '—';
+          breakdownFxRate.textContent = '—';
+        }
+      });
+    }
+
+    // --- Debounce helper to avoid heavy recompute while typing ---
+    function debounce(fn, wait = 120) {
+      let t = 0;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn(...args), wait);
       };
+    }
 
-      const FX_CACHE_KEY = "momo_fx_cache_v1";
-      const FX_TTL_MS = 60 * 60 * 1000;
+    // --- Controller: gather inputs, validate, compute, update UI ---
+    let currentTxType = 'transfer'; // 'transfer' or 'withdraw'
+    function setTxType(type) {
+      currentTxType = type;
+      if (type === 'transfer') {
+        typeTransferBtn.classList.add('bg-sky-600','text-white');
+        typeTransferBtn.classList.remove('bg-white','text-slate-700','border');
+        typeWithdrawBtn.classList.remove('bg-sky-600','text-white');
+        typeWithdrawBtn.classList.add('bg-white','text-slate-700','border');
+        labelTax.textContent = 'Government Tax';
+        labelTotal.textContent = 'Total Sender Outlay';
+      } else {
+        typeWithdrawBtn.classList.add('bg-sky-600','text-white');
+        typeWithdrawBtn.classList.remove('bg-white','text-slate-700','border');
+        typeTransferBtn.classList.remove('bg-sky-600','text-white');
+        typeTransferBtn.classList.add('bg-white','text-slate-700','border');
+        labelTax.textContent = 'Statutory Withdrawal Tax';
+        labelTotal.textContent = 'Total Sender Outlay';
+      }
+      triggerCalculateDebounced();
+    }
 
-      const countrySelect = document.getElementById("country-select");
-      const networkSelect = document.getElementById("network-select");
-      const destCountrySelect = document.getElementById("dest-country-select");
-      const destNetworkSelect = document.getElementById("dest-network-select");
-      const amountInput = document.getElementById("amount-input");
-      const currencyAddon = document.getElementById("currency-addon");
-      const modeLocal = document.getElementById("mode-local");
-      const modeCross = document.getElementById("mode-cross");
-      const typeTransfer = document.getElementById("type-transfer");
-      const typeWithdraw = document.getElementById("type-withdraw");
-      const txTypeContainer = document.getElementById("tx-type-container");
-      const destinationCorridorBox = document.getElementById("destination-corridor-box");
-      const tierBadge = document.getElementById("tier-badge");
-      const labelFee = document.getElementById("label-fee");
-      const labelTax = document.getElementById("label-tax");
-      const labelTotal = document.getElementById("label-total");
-      const taxRow = document.getElementById("tax-row");
-      const remittanceFields = document.getElementById("remittance-fields");
-      const originLabel = document.getElementById("origin-label");
-      const breakdownBase = document.getElementById("breakdown-base");
-      const breakdownFee = document.getElementById("breakdown-fee");
-      const breakdownTax = document.getElementById("breakdown-tax");
-      const breakdownTotal = document.getElementById("breakdown-total");
-      const breakdownFxRate = document.getElementById("breakdown-fx-rate");
-      const breakdownDestPayout = document.getElementById("breakdown-dest-payout");
-      const usdCrossContainer = document.getElementById("usd-cross-container");
-      const usdCrossValue = document.getElementById("usd-cross-value");
-      const exchangeBadge = document.getElementById("exchange-badge");
-      const bracketInfo = document.getElementById("tier-badge");
+    function gatherAndCompute() {
+      const fromCode = countrySelect.value;
+      const toCode = modeCross.checked ? destCountrySelect.value : null;
+      const network = networkSelect.value;
+      const destNetwork = destNetworkSelect.value;
+      const amount = Math.max(0, Number(amountInput.value || 0));
+      const cross = !!modeCross.checked;
 
-      let exchangeRates = { ...FALLBACK_RATES };
-      let currentMode = "local";
-      let activeTransactionType = "transfer";
-
-      const numberFormatterCache = new Map();
-
-      function getFormatter(currency) {
-        const key = currency || "default";
-        if (!numberFormatterCache.has(key)) {
-          numberFormatterCache.set(
-            key,
-            new Intl.NumberFormat("en-US", {
-              maximumFractionDigits: 2,
-              minimumFractionDigits: 0
-            })
-          );
-        }
-        return numberFormatterCache.get(key);
+      // validation
+      const v = validateAmount(fromCode, amount);
+      if (!v.ok) {
+        validationMsg.textContent = v.message;
+        validationMsg.classList.remove('hidden');
+        // clear outputs
+        scheduleUiUpdate({ providerFee: 0, tax: 0, totalSender: 0, recipientPayout: null, fxRate: null });
+        tierBadge.textContent = '—';
+        return;
+      } else {
+        validationMsg.classList.add('hidden');
       }
 
-      function findTier(tiers, amount) {
-        if (!Array.isArray(tiers) || !tiers.length) return null;
+      // matched tier display (source or dest depending on cross)
+      const srcCfg = byCode[fromCode];
+      const srcTier = findTier(amount, srcCfg?.tariff_matrix);
+      tierBadge.textContent = srcTier ? `${(srcTier.min_limit ?? 0).toLocaleString()} - ${(srcTier.max_limit ?? '∞').toLocaleString()} ${srcCfg.currency}` : 'Outside standard tiers';
 
-        let left = 0;
-        let right = tiers.length - 1;
+      const result = compute({ fromCode, toCode, network, destNetwork, amount, txType: currentTxType, cross });
+      scheduleUiUpdate(result || { providerFee: 0, tax: 0, totalSender: 0, recipientPayout: null, fxRate: null });
+    }
 
-        while (left <= right) {
-          const mid = Math.floor((left + right) / 2);
-          const tier = tiers[mid];
+    const triggerCalculateDebounced = debounce(gatherAndCompute, 120);
 
-          if (amount >= tier.min && amount <= tier.max) return tier;
-          if (amount < tier.min) right = mid - 1;
-          else left = mid + 1;
-        }
-
-        return tiers[tiers.length - 1];
-      }
-
-      function setMode(mode) {
-        currentMode = mode;
-
-        if (mode === "local") {
-          modeLocal.classList.add("active");
-          modeLocal.classList.remove("inactive");
-          modeCross.classList.add("inactive");
-          modeCross.classList.remove("active");
-
-          destinationCorridorBox.classList.add("hidden");
-          destinationCorridorBox.classList.remove("grid");
-          txTypeContainer.classList.remove("hidden");
-          remittanceFields.classList.add("hidden");
-          taxRow.classList.remove("hidden");
-          originLabel.textContent = "Sender Country";
-          labelTotal.textContent = "Total Sender Outlay";
-        } else {
-          modeCross.classList.add("active");
-          modeCross.classList.remove("inactive");
-          modeLocal.classList.add("inactive");
-          modeLocal.classList.remove("active");
-
-          destinationCorridorBox.classList.remove("hidden");
-          destinationCorridorBox.classList.add("grid");
-          txTypeContainer.classList.add("hidden");
-          remittanceFields.classList.remove("hidden");
-          taxRow.classList.add("hidden");
-          originLabel.textContent = "Sender Country";
-          labelTotal.textContent = "Total Sender Outlay";
-        }
-
-        calculate();
-      }
-
-      function setTransactionType(type) {
-        activeTransactionType = type;
-
-        if (type === "transfer") {
-          typeTransfer.classList.add("active");
-          typeTransfer.classList.remove("inactive");
-          typeWithdraw.classList.add("inactive");
-          typeWithdraw.classList.remove("active");
-          labelTax.textContent = "Government Tax";
-          labelTotal.textContent = "Total Sender Outlay";
-        } else {
-          typeWithdraw.classList.add("active");
-          typeWithdraw.classList.remove("inactive");
-          typeTransfer.classList.add("inactive");
-          typeTransfer.classList.remove("active");
-          labelTax.textContent = "Excise Surcharge";
-          labelTotal.textContent = "Net Take-home Cash";
-        }
-
-        calculate();
-      }
-
-      function populateCountries() {
-        const countries = Object.keys(countryData);
-
-        countrySelect.innerHTML = "";
-        destCountrySelect.innerHTML = "";
-
-        countries.forEach((code) => {
-          const option = document.createElement("option");
-          option.value = code;
-          option.textContent = `${code} (${countryData[code].currency})`;
-          countrySelect.appendChild(option);
-
-          if (code !== "UG") {
-            const destOption = option.cloneNode(true);
-            destCountrySelect.appendChild(destOption);
-          }
-        });
-
-        countrySelect.value = "UG";
-        destCountrySelect.value = "KE";
-      }
-
-      function populateNetworks(countryCode, targetSelect) {
-        const config = countryData[countryCode];
-        const networks = Object.keys(config.networks);
-
-        targetSelect.innerHTML = "";
-        networks.forEach((network) => {
-          const option = document.createElement("option");
-          option.value = network;
-          option.textContent = network;
-          targetSelect.appendChild(option);
-        });
-      }
-
-      function renderCurrencyLabel() {
-        const country = countrySelect.value;
-        currencyAddon.textContent = countryData[country].currency;
-      }
-
-      function formatValue(value, currency) {
-        const formatter = getFormatter(currency);
-        return `${formatter.format(value)} ${currency}`;
-      }
-
-      function updateUSDDisplay(amount, currency) {
-        if (exchangeRates[currency]) {
-          const usdValue = amount / exchangeRates[currency];
-          usdCrossValue.textContent = `$${usdValue.toFixed(2)}`;
-          usdCrossContainer.classList.remove("hidden");
-        } else {
-          usdCrossContainer.classList.add("hidden");
-        }
-      }
-
-      function clearDisplay(currency) {
-        breakdownBase.textContent = `0.00 ${currency}`;
-        breakdownFee.textContent = `0.00 ${currency}`;
-        breakdownTax.textContent = `0.00 ${currency}`;
-        breakdownTotal.textContent = `0.00 ${currency}`;
-        breakdownFxRate.textContent = `1 ${currency} = 0.00`;
-        breakdownDestPayout.textContent = `0.00`;
-        tierBadge.classList.add("hidden");
-        usdCrossContainer.classList.add("hidden");
-      }
-
-      function calculateLocal() {
-        const country = countrySelect.value;
-        const network = networkSelect.value;
-        const amount = Number(amountInput.value) || 0;
-        const config = countryData[country].networks[network];
-        const tiers = activeTransactionType === "transfer" ? config.tiersTransfer : config.tiersWithdraw;
-        const matchedTier = findTier(tiers, amount);
-        const platformFee = matchedTier ? matchedTier.fee : 0;
-
-        let tax = 0;
-        let total = 0;
-
-        if (country === "KE") {
-          tax = platformFee * (config.taxRateTransfer || config.taxRateWithdraw || 0);
-          total = activeTransactionType === "transfer" ? amount + platformFee + tax : amount - platformFee - tax;
-        } else if (country === "UG") {
-          tax = activeTransactionType === "withdraw" ? amount * (config.taxRateWithdraw || 0) : 0;
-          total = activeTransactionType === "transfer" ? amount + platformFee : amount - platformFee - tax;
-        } else {
-          total = activeTransactionType === "transfer" ? amount + platformFee : amount - platformFee;
-        }
-
-        const currency = countryData[country].currency;
-        tierBadge.textContent = `Tier range: ${matchedTier ? `${matchedTier.min.toLocaleString()} - ${matchedTier.max.toLocaleString()}` : "N/A"} ${currency}`;
-        tierBadge.classList.remove("hidden");
-
-        breakdownBase.textContent = formatValue(amount, currency);
-        breakdownFee.textContent = formatValue(platformFee, currency);
-        breakdownTax.textContent = formatValue(tax, currency);
-        breakdownTotal.textContent = formatValue(total, currency);
-
-        labelFee.textContent = "Tier Fee Charge";
-        updateUSDDisplay(amount, currency);
-      }
-
-      function calculateCrossBorder() {
-        const srcCountry = countrySelect.value;
-        const srcNetwork = networkSelect.value;
-        const destCountry = destCountrySelect.value;
-        const destNetwork = destNetworkSelect.value;
-        const amount = Number(amountInput.value) || 0;
-
-        const srcCurrency = countryData[srcCountry].currency;
-        const destCurrency = countryData[destCountry].currency;
-        const routingFeeRate = 0.015;
-        const fxSpread = 0.035;
-
-        const routingFee = amount * routingFeeRate;
-        const srcToUsd = exchangeRates[srcCurrency];
-        const destToUsd = exchangeRates[destCurrency];
-        const midMarketRate = destToUsd / srcToUsd;
-        const adjustedRate = midMarketRate * (1 - fxSpread);
-        const principalReceivable = amount * adjustedRate;
-        const totalSenderOutlay = amount + routingFee;
-
-        labelFee.textContent = "Remittance Routing Fee";
-        breakdownBase.textContent = formatValue(amount, srcCurrency);
-        breakdownFee.textContent = formatValue(routingFee, srcCurrency);
-        breakdownTax.textContent = "0.00";
-        breakdownTotal.textContent = formatValue(totalSenderOutlay, srcCurrency);
-
-        breakdownFxRate.textContent = `1 ${srcCurrency} = ${adjustedRate.toFixed(4)} ${destCurrency}`;
-        breakdownDestPayout.textContent = `${principalReceivable.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${destCurrency}`;
-
-        updateUSDDisplay(amount, srcCurrency);
-      }
-
-      function calculate() {
-        const country = countrySelect.value;
-        const network = networkSelect.value;
-        const amount = Number(amountInput.value) || 0;
-
-        if (!countryData[country] || !network || amount <= 0) {
-          clearDisplay(countryData[country]?.currency || "UGX");
-          return;
-        }
-
-        if (currentMode === "local") {
-          calculateLocal();
-        } else {
-          calculateCrossBorder();
-        }
-      }
-
-      async function loadExchangeRates() {
-        try {
-          const cachedRaw = localStorage.getItem(FX_CACHE_KEY);
-          if (cachedRaw) {
-            const cached = JSON.parse(cachedRaw);
-            if (cached?.rates && Date.now() - cached.timestamp < FX_TTL_MS) {
-              exchangeRates = cached.rates;
-              exchangeBadge.classList.remove("hidden");
-              return;
-            }
-          }
-
-          const response = await fetch("https://open.er-api.com/v6/latest/USD", { cache: "no-store" });
-          if (!response.ok) throw new Error("Request failed");
-
-          const data = await response.json();
-          if (data && data.rates) {
-            exchangeRates = data.rates;
-            localStorage.setItem(FX_CACHE_KEY, JSON.stringify({
-              timestamp: Date.now(),
-              rates: exchangeRates
-            }));
-            exchangeBadge.classList.remove("hidden");
-          }
-        } catch (error) {
-          console.warn("Using fallback FX values.", error);
-          exchangeRates = { ...FALLBACK_RATES };
-        }
-      }
-
-      function attachEvents() {
-        countrySelect.addEventListener("change", () => {
-          renderCurrencyLabel();
-          populateNetworks(countrySelect.value, networkSelect);
-          calculate();
-        });
-
-        networkSelect.addEventListener("change", calculate);
-        amountInput.addEventListener("input", calculate);
-
-        modeLocal.addEventListener("click", () => setMode("local"));
-        modeCross.addEventListener("click", () => setMode("cross"));
-
-        typeTransfer.addEventListener("click", () => setTransactionType("transfer"));
-        typeWithdraw.addEventListener("click", () => setTransactionType("withdraw"));
-
-        destCountrySelect.addEventListener("change", () => {
-          populateNetworks(destCountrySelect.value, destNetworkSelect);
-          calculate();
-        });
-
-        destNetworkSelect.addEventListener("change", calculate);
-      }
-
-      async function init() {
-        populateCountries();
+    // --- Event bindings (set once) ---
+    function attachEvents() {
+      countrySelect.addEventListener('change', () => {
         populateNetworks(countrySelect.value, networkSelect);
-        populateNetworks(destCountrySelect.value, destNetworkSelect);
-        renderCurrencyLabel();
-        attachEvents();
-        await loadExchangeRates();
-        setMode("local");
-        setTransactionType("transfer");
-        calculate();
-      }
+        // choose a default dest country if current equals source for cross
+        if (modeCross.checked && destCountrySelect.value === countrySelect.value) {
+          // pick first different country
+          destCountrySelect.value = Object.keys(byCode).find(c => c !== countrySelect.value) || destCountrySelect.value;
+          populateNetworks(destCountrySelect.value, destNetworkSelect);
+        }
+        updateCurrencyAddonFor(countrySelect.value);
+        triggerCalculateDebounced();
+      });
 
-      init();
-    })();
+      networkSelect.addEventListener('change', triggerCalculateDebounced);
+      destCountrySelect.addEventListener('change', () => {
+        populateNetworks(destCountrySelect.value, destNetworkSelect);
+        triggerCalculateDebounced();
+      });
+      destNetworkSelect.addEventListener('change', triggerCalculateDebounced);
+
+      modeCross.addEventListener('change', () => {
+        destControls.classList.toggle('hidden', !modeCross.checked);
+        // show/hide remittance block handled in compute UI
+        triggerCalculateDebounced();
+      });
+
+      amountInput.addEventListener('input', triggerCalculateDebounced);
+
+      typeTransferBtn.addEventListener('click', () => setTxType('transfer'));
+      typeWithdrawBtn.addEventListener('click', () => setTxType('withdraw'));
+    }
+
+    // --- Initialization: populate defaults & fetch rates (single fetch) ---
+    async function init() {
+      // populate initial selects
+      populateNetworks(countrySelect.value, networkSelect);
+      populateNetworks(destCountrySelect.value, destNetworkSelect);
+      updateCurrencyAddonFor(countrySelect.value);
+
+      // set initial tx type
+      setTxType('transfer');
+
+      // fetch FX once (async)
+      fetchExchangeRatesOnce().then(() => {
+        // small UI cue
+        exchangeBadge.classList.remove('hidden');
+        // trigger an initial calculation once rates available
+        triggerCalculateDebounced();
+      });
+
+      attachEvents();
+      // initial render
+      triggerCalculateDebounced();
+    }
+
+    init();
   </script>
 </body>
 </html>
