@@ -1,0 +1,66 @@
+{
+  "UG": {
+    "currency": "UGX",
+    "networks": {
+      "MTN MoMo": {
+        "taxTransfer": 0.005,
+        "taxWithdraw": 0.0,
+        "tiers": [
+          { "max": 2500, "send": 100, "withdraw": 350 },
+          { "max": 5000, "send": 250, "withdraw": 450 },
+          { "max": 15000, "send": 450, "withdraw": 700 },
+          { "max": 30000, "send": 600, "withdraw": 1000 },
+          { "max": 7000000, "send": 3000, "withdraw": 20000 }
+        ]
+      },
+      "Airtel Money": {
+        "taxTransfer": 0.005,
+        "taxWithdraw": 0.0,
+        "tiers": [
+          { "max": 2500, "send": 90, "withdraw": 330 },
+          { "max": 5000, "send": 230, "withdraw": 450 },
+          { "max": 7000000, "send": 2000, "withdraw": 12000 }
+        ]
+      }
+    }
+  },
+  "KE": {
+    "currency": "KES",
+    "networks": {
+      "Safaricom M-Pesa": {
+        "taxTransfer": 0.12,
+        "taxWithdraw": 0.12,
+        "tiers": [
+          { "max": 100, "send": 0, "withdraw": 11 },
+          { "max": 500, "send": 7, "withdraw": 28 },
+          { "max": 5000, "send": 57, "withdraw": 87 },
+          { "max": 250000, "send": 108, "withdraw": 309 }
+        ]
+      }
+    }
+  },
+  "TZ": {
+    "currency": "TZS",
+    "networks": {
+      "Vodacom M-Pesa": {
+        "taxTransfer": 0,
+        "taxWithdraw": 0,
+        "tiers": [
+          { "max": 5000000, "send": 450, "withdraw": 1200 }
+        ]
+      }
+    }
+  },
+  "RW": {
+    "currency": "RWF",
+    "networks": {
+      "MTN MoMo": {
+        "taxTransfer": 0,
+        "taxWithdraw": 0,
+        "tiers": [
+          { "max": 3000000, "send": 250, "withdraw": 800 }
+        ]
+      }
+    }
+  }
+}
