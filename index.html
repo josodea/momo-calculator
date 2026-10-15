@@ -4,10 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>East African Moble Money Calculator</title>
-  <meta name="description" content="Calculate mobile money transfer and withdrawal fees for East African networks using tiered brackets." />
+  <meta name="description" content="Calculate mobile money transfer and withdrawal fees across East African networks using tier-based pricing." />
   <meta name="robots" content="index, follow" />
 
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com" defer></script>
 
   <style>
@@ -17,17 +16,18 @@
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
 
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col">
   <header class="bg-indigo-600 text-white shadow-md py-6 px-4">
     <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <span class="text-3xl">📊</span>
         <div>
-          <h1 class="text-2xl font-bold">East African Moble Money Calculator</h1>
+          <h1 class="text-2xl font-bold tracking-tight">East African Moble Money Calculator</h1>
           <p class="text-xs text-indigo-200">Tier-Bracket Mathematical Fee Engine</p>
         </div>
       </div>
+
       <div id="exchange-badge" class="bg-indigo-700 text-xs px-3 py-1.5 rounded-full border border-indigo-500 text-indigo-100 hidden">
         Rates auto-updated live
       </div>
@@ -36,15 +36,15 @@
 
   <main class="flex-grow max-w-4xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
     <section class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6 flex flex-col gap-5">
-      <h2 class="text-lg font-semibold text-slate-900">Transaction Details</h2>
+      <h2 class="text-lg font-semibold text-slate-900 border-b border-slate-100 pb-3">Transaction Details</h2>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Select Country</label>
+        <label for="country-select" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Select Country</label>
         <select id="country-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors"></select>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Network Provider</label>
+        <label for="network-select" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Network Provider</label>
         <select id="network-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors"></select>
       </div>
 
@@ -61,10 +61,16 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Amount</label>
+        <label for="amount-input" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Amount</label>
         <div class="relative">
           <span id="currency-addon" class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">UGX</span>
-          <input id="amount-input" type="number" min="1" placeholder="Enter amount" class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-16 pr-4 py-3 text-lg font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors" />
+          <input
+            id="amount-input"
+            type="number"
+            min="1"
+            placeholder="Enter amount"
+            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-16 pr-4 py-3 text-lg font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 transition-colors"
+          />
         </div>
         <p id="bracket-info" class="text-xs text-slate-400 mt-1.5 italic"></p>
       </div>
@@ -79,15 +85,19 @@
             <span class="text-sm text-slate-500">Base Amount</span>
             <span id="breakdown-base" class="font-medium text-slate-800">0.00</span>
           </div>
+
           <div class="flex justify-between items-center">
             <span class="text-sm text-slate-500">Network Tier Fee</span>
             <span id="breakdown-fee" class="font-medium text-amber-600">0.00</span>
           </div>
+
           <div class="flex justify-between items-center">
             <span id="label-tax" class="text-sm text-slate-500">Statutory Tax</span>
             <span id="breakdown-tax" class="font-medium text-amber-600">0.00</span>
           </div>
+
           <hr class="border-slate-100 my-2" />
+
           <div class="flex flex-col gap-1">
             <span id="label-total" class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Outlay Required</span>
             <span id="breakdown-total" class="text-2xl font-bold text-indigo-600">0.00</span>
@@ -110,9 +120,7 @@
   </footer>
 
   <script>
-    (function () {
-      'use strict';
-
+    (() => {
       const countryData = {
         UG: {
           currency: "UGX",
@@ -151,6 +159,7 @@
                 { min: 4000001, max: 7000000, fee: 20000 }
               ]
             },
+
             "Airtel Money": {
               taxRateTransfer: 0.005,
               taxRateWithdraw: 0.0,
@@ -187,6 +196,7 @@
             }
           }
         },
+
         KE: {
           currency: "KES",
           networks: {
@@ -227,6 +237,7 @@
             }
           }
         },
+
         TZ: {
           currency: "TZS",
           networks: {
@@ -254,6 +265,7 @@
             }
           }
         },
+
         RW: {
           currency: "RWF",
           networks: {
@@ -279,52 +291,50 @@
         }
       };
 
-      const FX_API_URL = 'https://open.er-api.com/v6/latest/USD';
-      const FX_CACHE_KEY = 'momo_fx_cache';
-      const FX_CACHE_TTL_MS = 1000 * 60 * 60;
+      const FX_API_URL = "https://open.er-api.com/v6/latest/USD";
+      const FX_CACHE_KEY = "momo_fx_cache_v1";
+      const FX_CACHE_TTL_MS = 60 * 60 * 1000;
 
-      const byId = (id) => document.getElementById(id);
-
-      const countrySelect = byId('country-select');
-      const networkSelect = byId('network-select');
-      const amountInput = byId('amount-input');
-      const currencyAddon = byId('currency-addon');
-      const typeTransfer = byId('type-transfer');
-      const typeWithdraw = byId('type-withdraw');
-      const bracketInfo = byId('bracket-info');
-      const breakdownBase = byId('breakdown-base');
-      const breakdownFee = byId('breakdown-fee');
-      const breakdownTax = byId('breakdown-tax');
-      const breakdownTotal = byId('breakdown-total');
-      const usdCrossContainer = byId('usd-cross-container');
-      const usdCrossValue = byId('usd-cross-value');
-      const exchangeBadge = byId('exchange-badge');
-      const labelTax = byId('label-tax');
-      const labelTotal = byId('label-total');
+      const countrySelect = document.getElementById("country-select");
+      const networkSelect = document.getElementById("network-select");
+      const amountInput = document.getElementById("amount-input");
+      const currencyAddon = document.getElementById("currency-addon");
+      const typeTransfer = document.getElementById("type-transfer");
+      const typeWithdraw = document.getElementById("type-withdraw");
+      const bracketInfo = document.getElementById("bracket-info");
+      const breakdownBase = document.getElementById("breakdown-base");
+      const breakdownFee = document.getElementById("breakdown-fee");
+      const breakdownTax = document.getElementById("breakdown-tax");
+      const breakdownTotal = document.getElementById("breakdown-total");
+      const usdCrossContainer = document.getElementById("usd-cross-container");
+      const usdCrossValue = document.getElementById("usd-cross-value");
+      const exchangeBadge = document.getElementById("exchange-badge");
+      const labelTax = document.getElementById("label-tax");
+      const labelTotal = document.getElementById("label-total");
 
       let exchangeRates = { USD: 1 };
-      let activeTransactionType = 'transfer';
+      let activeTransactionType = "transfer";
 
       const numberFormatCache = {};
       function getFormatter(currency) {
         if (!numberFormatCache[currency]) {
-          numberFormatCache[currency] = new Intl.NumberFormat(undefined, {
+          numberFormatCache[currency] = new Intl.NumberFormat("en-US", {
             maximumFractionDigits: 2
           });
         }
         return numberFormatCache[currency];
       }
 
-      function debounce(fn, wait) {
+      function debounce(fn, delay) {
         let timer = null;
         return (...args) => {
           clearTimeout(timer);
-          timer = setTimeout(() => fn(...args), wait);
+          timer = setTimeout(() => fn(...args), delay);
         };
       }
 
       function findTier(tiers, amount) {
-        if (!Array.isArray(tiers) || !tiers.length) return null;
+        if (!Array.isArray(tiers) || tiers.length === 0) return null;
 
         let low = 0;
         let high = tiers.length - 1;
@@ -332,8 +342,8 @@
         while (low <= high) {
           const mid = Math.floor((low + high) / 2);
           const tier = tiers[mid];
-          const min = tier.min || -Infinity;
-          const max = tier.max || Infinity;
+          const min = tier.min;
+          const max = tier.max;
 
           if (amount >= min && amount <= max) return tier;
           if (amount < min) high = mid - 1;
@@ -343,67 +353,175 @@
         return tiers[tiers.length - 1];
       }
 
+      function populateCountries() {
+        const countries = Object.keys(countryData);
+        countrySelect.innerHTML = "";
+
+        countries.forEach((code) => {
+          const option = document.createElement("option");
+          option.value = code;
+          option.textContent = `${code} (${countryData[code].currency})`;
+          countrySelect.appendChild(option);
+        });
+
+        countrySelect.value = countries[0];
+      }
+
+      function populateNetworks(countryCode) {
+        const config = countryData[countryCode];
+        const networks = Object.keys(config.networks);
+
+        networkSelect.innerHTML = "";
+        networks.forEach((network) => {
+          const option = document.createElement("option");
+          option.value = network;
+          option.textContent = network;
+          networkSelect.appendChild(option);
+        });
+
+        currencyAddon.textContent = config.currency;
+      }
+
+      function setTransactionType(type) {
+        activeTransactionType = type;
+
+        if (type === "transfer") {
+          typeTransfer.className = "py-2.5 text-sm font-medium rounded-lg bg-indigo-600 text-white shadow-sm transition-all";
+          typeWithdraw.className = "py-2.5 text-sm font-medium rounded-lg text-slate-600 transition-all";
+          labelTax.textContent = "Statutory Tax";
+          labelTotal.textContent = "Total Outlay Required";
+        } else {
+          typeTransfer.className = "py-2.5 text-sm font-medium rounded-lg text-slate-600 transition-all";
+          typeWithdraw.className = "py-2.5 text-sm font-medium rounded-lg bg-indigo-600 text-white shadow-sm transition-all";
+          labelTax.textContent = "Excise Surcharge";
+          labelTotal.textContent = "Net Received Cash";
+        }
+
+        calculate();
+      }
+
       async function loadExchangeRates() {
         try {
           const cached = localStorage.getItem(FX_CACHE_KEY);
           if (cached) {
             const parsed = JSON.parse(cached);
-            if (parsed && parsed.ts && (Date.now() - parsed.ts) < FX_CACHE_TTL_MS && parsed.rates) {
+            if (parsed && parsed.timestamp && Date.now() - parsed.timestamp < FX_CACHE_TTL_MS && parsed.rates) {
               exchangeRates = parsed.rates;
-              exchangeBadge.classList.remove('hidden');
+              exchangeBadge.classList.remove("hidden");
               return;
             }
           }
 
-          const res = await fetch(FX_API_URL, { cache: 'no-cache' });
-          if (!res.ok) throw new Error('FX fetch failed');
+          const response = await fetch(FX_API_URL, { cache: "no-store" });
+          if (!response.ok) throw new Error("Failed to fetch FX data");
 
-          const data = await res.json();
+          const data = await response.json();
           if (data && data.rates) {
             exchangeRates = data.rates;
-            localStorage.setItem(FX_CACHE_KEY, JSON.stringify({
-              ts: Date.now(),
-              rates: exchangeRates
-            }));
-            exchangeBadge.classList.remove('hidden');
+            localStorage.setItem(
+              FX_CACHE_KEY,
+              JSON.stringify({
+                timestamp: Date.now(),
+                rates: exchangeRates
+              })
+            );
+            exchangeBadge.classList.remove("hidden");
           }
         } catch (error) {
-          console.warn('Using fallback FX values.', error);
+          console.warn("Using fallback FX values.", error);
+          exchangeRates = {
+            UGX: 3710,
+            KES: 129,
+            TZS: 2510,
+            RWF: 1260,
+            USD: 1
+          };
         }
       }
 
-      function populateCountries() {
-        const fragment = document.createDocumentFragment();
-
-        Object.keys(countryData).forEach((code) => {
-          const option = document.createElement('option');
-          option.value = code;
-          option.textContent = `${code} (${countryData[code].currency})`;
-          fragment.appendChild(option);
-        });
-
-        countrySelect.appendChild(fragment);
-      }
-
-      function populateNetworks(countryCode) {
-        const config = countryData[countryCode];
-        networkSelect.innerHTML = '';
-
-        if (!config) return;
-
-        const fragment = document.createDocumentFragment();
-
-        Object.keys(config.networks).forEach((networkName) => {
-          const option = document.createElement('option');
-          option.value = networkName;
-          option.textContent = networkName;
-          fragment.appendChild(option);
-        });
-
-        networkSelect.appendChild(fragment);
-        currencyAddon.textContent = config.currency;
-      }
-
-      function calculateNow() {
+      function calculate() {
         const country = countrySelect.value;
-        const network =
+        const network = networkSelect.value;
+        const amount = parseFloat(amountInput.value) || 0;
+        const currency = countryData[country]?.currency || "";
+
+        if (!network || amount <= 0) {
+          bracketInfo.textContent = "";
+          breakdownBase.textContent = `0.00 ${currency}`;
+          breakdownFee.textContent = `0.00 ${currency}`;
+          breakdownTax.textContent = `0.00 ${currency}`;
+          breakdownTotal.textContent = `0.00 ${currency}`;
+          usdCrossContainer.classList.add("hidden");
+          return;
+        }
+
+        const config = countryData[country].networks[network];
+        const tiers = activeTransactionType === "transfer" ? config.tiersTransfer : config.tiersWithdraw;
+        const matchedTier = findTier(tiers, amount);
+
+        let baseFee = matchedTier ? matchedTier.fee : 0;
+        let tax = 0;
+        let total = 0;
+
+        if (activeTransactionType === "transfer") {
+          if (country === "UG") {
+            tax = amount * (config.taxRateTransfer || 0);
+          } else if (country === "KE") {
+            tax = baseFee * (config.taxRateTransfer || 0);
+          }
+          total = amount + baseFee + tax;
+        } else {
+          if (country === "KE") {
+            tax = baseFee * (config.taxRateWithdraw || 0);
+          } else if (country === "UG") {
+            tax = amount * (config.taxRateWithdraw || 0);
+          }
+          total = amount - baseFee - tax;
+        }
+
+        const fmt = getFormatter(currency);
+
+        bracketInfo.textContent = matchedTier
+          ? `Matched Tier Range: ${fmt.format(matchedTier.min)} - ${fmt.format(matchedTier.max)} ${currency}`
+          : "";
+
+        breakdownBase.textContent = `${fmt.format(amount)} ${currency}`;
+        breakdownFee.textContent = `${fmt.format(baseFee)} ${currency}`;
+        breakdownTax.textContent = `${fmt.format(tax)} ${currency}`;
+        breakdownTotal.textContent = `${fmt.format(total)} ${currency}`;
+
+        if (exchangeRates[currency]) {
+          const usdValue = amount / exchangeRates[currency];
+          usdCrossValue.textContent = `$${usdValue.toFixed(2)}`;
+          usdCrossContainer.classList.remove("hidden");
+        } else {
+          usdCrossContainer.classList.add("hidden");
+        }
+      }
+
+      const debouncedCalculate = debounce(calculate, 120);
+
+      function init() {
+        populateCountries();
+        populateNetworks(countrySelect.value);
+
+        countrySelect.addEventListener("change", () => {
+          populateNetworks(countrySelect.value);
+          debouncedCalculate();
+        });
+
+        networkSelect.addEventListener("change", debouncedCalculate);
+        amountInput.addEventListener("input", debouncedCalculate);
+
+        typeTransfer.addEventListener("click", () => setTransactionType("transfer"));
+        typeWithdraw.addEventListener("click", () => setTransactionType("withdraw"));
+
+        loadExchangeRates();
+        calculate();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
